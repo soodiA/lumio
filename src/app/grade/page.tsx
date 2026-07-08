@@ -31,7 +31,7 @@ export default function GradePage() {
           {gradeGroups.map((group) => (
             <Link
               key={group.id}
-              href={`/courses?grade=${group.id}`}
+              href={`/stages?grade=${group.id}`}
               className="flex items-center gap-4 bg-white rounded-2xl p-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.07)" }}
             >

@@ -1,20 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { questions } from "@/data/questions";
+import { questions, QuestionOption } from "@/data/questions";
 
 const TOTAL_QUESTIONS = 10;
 const CURRENT_QUESTION = 3;
 
 const demoQuestion = questions.find((q) => q.id === 1)!;
 
+function shuffleArray<T>(arr: T[]): T[] {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 export default function QuestionPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [showTranslation, setShowTranslation] = useState(false);
+
+  // Shuffle options once when page loads — stable across re-renders
+  const shuffledOptions = useMemo<QuestionOption[]>(
+    () => shuffleArray(demoQuestion.options),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const isCorrect = selected === demoQuestion.correct;
   const hasImageOptions = demoQuestion.options.some((o) => o.image_url);
@@ -59,7 +75,7 @@ export default function QuestionPage() {
             className="text-sm font-medium px-3 py-1 rounded-full"
             style={{ background: "#42A5F520", color: "#42A5F5" }}
           >
-            مرحله ۲ — سوال بصری
+            مرحله ۱
           </span>
         </div>
 
@@ -124,9 +140,9 @@ export default function QuestionPage() {
             </div>
           )}
 
-          {/* Options */}
-          <div className={`flex flex-col gap-3 ${hasImageOptions ? "" : ""}`}>
-            {demoQuestion.options.map((opt) => {
+          {/* Options — rendered in shuffled order */}
+          <div className="flex flex-col gap-3">
+            {shuffledOptions.map((opt) => {
               let borderColor = "#E5E7EB";
               let bg = "white";
               let textColor = "#1a1a1a";
@@ -184,9 +200,11 @@ export default function QuestionPage() {
                         color: selected === opt.id && !submitted ? "white" : textColor,
                       }}
                     >
-                      {submitted && opt.id === demoQuestion.correct ? "✓" :
-                       submitted && opt.id === selected && !isCorrect ? "✕" :
-                       opt.id}
+                      {submitted && opt.id === demoQuestion.correct
+                        ? "✓"
+                        : submitted && opt.id === selected && !isCorrect
+                        ? "✕"
+                        : opt.id}
                     </span>
                     <span className="flex flex-col gap-0.5 text-right flex-1">
                       <span className="text-base font-semibold">{opt.text_en}</span>

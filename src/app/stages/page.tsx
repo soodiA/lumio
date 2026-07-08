@@ -1,49 +1,33 @@
+"use client";
+
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Suspense } from "react";
 
-const stages = [
-  {
-    id: 1,
-    name: "دنباله‌های عددی",
-    emoji: "🔢",
-    color: "#42A5F5",
-    locked: false,
-    questions: 10,
-  },
-  {
-    id: 2,
-    name: "الگوهای شکلی",
-    emoji: "🔶",
-    color: "#66BB6A",
-    locked: true,
-    questions: 10,
-  },
-  {
-    id: 3,
-    name: "مسائل کلامی",
-    emoji: "📖",
-    color: "#FFD54F",
-    locked: true,
-    questions: 10,
-  },
-  {
-    id: 4,
-    name: "هندسه ساده",
-    emoji: "📐",
-    color: "#AB47BC",
-    locked: true,
-    questions: 10,
-  },
-  {
-    id: 5,
-    name: "چالش نهایی",
-    emoji: "🏆",
-    color: "#EF5350",
-    locked: true,
-    questions: 15,
-  },
-];
+const STAGE_COUNT = 6;
+const STAGE_COLORS = ["#42A5F5", "#66BB6A", "#FFA726", "#AB47BC", "#EF5350", "#26C6DA"];
+const STAGE_EMOJIS = ["⭐", "🌟", "🔥", "💎", "🚀", "🏆"];
 
-export default function StagesPage() {
+function StagesContent() {
+  const params = useSearchParams();
+  const grade = params.get("grade") ?? "1-2";
+
+  const gradeLabel: Record<string, string> = {
+    "1-2": "پایه اول و دوم",
+    "3-4": "پایه سوم و چهارم",
+    "5-6": "پایه پنجم و ششم",
+    "7-8": "پایه هفتم و هشتم",
+    "9-10": "پایه نهم و دهم",
+    "11-12": "پایه یازدهم و دوازدهم",
+  };
+
+  const stages = Array.from({ length: STAGE_COUNT }, (_, i) => ({
+    id: i + 1,
+    locked: i > 0,
+    color: STAGE_COLORS[i],
+    emoji: STAGE_EMOJIS[i],
+  }));
+
   return (
     <main
       className="flex flex-col flex-1 items-center min-h-screen px-6 py-10"
@@ -52,8 +36,11 @@ export default function StagesPage() {
       <div className="w-full max-w-sm">
         {/* Header */}
         <div className="text-center mb-8">
+          <p className="text-sm font-medium mb-1" style={{ color: "#42A5F5" }}>
+            {gradeLabel[grade] ?? grade}
+          </p>
           <h1 className="text-2xl font-bold" style={{ color: "#1a1a1a" }}>
-            مراحل دوره
+            مراحل آموزشی
           </h1>
           <p className="text-base mt-2" style={{ color: "#777" }}>
             مراحل را یک‌به‌یک باز کن
@@ -62,21 +49,16 @@ export default function StagesPage() {
 
         {/* Stage list */}
         <div className="flex flex-col gap-4 relative">
-          {/* Connector line */}
           <div
             className="absolute right-7 top-14 bottom-14 w-0.5"
             style={{ background: "#E5E7EB", zIndex: 0 }}
           />
 
           {stages.map((stage) => (
-            <div
-              key={stage.id}
-              className="flex items-center gap-4 relative"
-              style={{ zIndex: 1 }}
-            >
-              {/* Stage icon */}
+            <div key={stage.id} className="flex items-center gap-4 relative" style={{ zIndex: 1 }}>
+              {/* Circle */}
               <div
-                className="w-14 h-14 rounded-full flex items-center justify-center text-2xl flex-shrink-0 transition-all duration-200"
+                className="w-14 h-14 rounded-full flex items-center justify-center text-2xl flex-shrink-0"
                 style={{
                   background: stage.locked ? "#F3F4F6" : stage.color + "25",
                   border: `3px solid ${stage.locked ? "#E5E7EB" : stage.color}`,
@@ -85,7 +67,7 @@ export default function StagesPage() {
                 {stage.locked ? "🔒" : stage.emoji}
               </div>
 
-              {/* Stage info card */}
+              {/* Card */}
               <div
                 className="flex-1 bg-white rounded-2xl p-4 flex items-center justify-between"
                 style={{
@@ -93,25 +75,25 @@ export default function StagesPage() {
                   opacity: stage.locked ? 0.6 : 1,
                 }}
               >
-                <div className="flex flex-col gap-1">
-                  <span
-                    className="text-base font-bold"
-                    style={{ color: "#1a1a1a" }}
-                  >
-                    مرحله {stage.id}: {stage.name}
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-base font-bold" style={{ color: "#1a1a1a" }}>
+                    مرحله {stage.id}
                   </span>
                   <span className="text-sm" style={{ color: "#888" }}>
-                    {stage.questions} سوال
+                    ۱۰ سوال
                   </span>
                 </div>
 
                 {stage.locked ? (
-                  <span className="text-sm font-medium px-3 py-1 rounded-full" style={{ background: "#F3F4F6", color: "#9CA3AF" }}>
+                  <span
+                    className="text-sm font-medium px-3 py-1 rounded-full"
+                    style={{ background: "#F3F4F6", color: "#9CA3AF" }}
+                  >
                     قفل
                   </span>
                 ) : (
                   <Link
-                    href={`/question?stage=${stage.id}`}
+                    href={`/question?grade=${grade}&stage=${stage.id}`}
                     className="text-sm font-bold text-white px-4 py-2 rounded-full transition-all duration-200 hover:opacity-90 active:scale-95"
                     style={{ background: stage.color }}
                   >
@@ -124,5 +106,13 @@ export default function StagesPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function StagesPage() {
+  return (
+    <Suspense>
+      <StagesContent />
+    </Suspense>
   );
 }
