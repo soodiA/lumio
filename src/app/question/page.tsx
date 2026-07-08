@@ -225,11 +225,11 @@ function QuestionContent() {
 
           {/* Question text */}
           <div>
-            <p className="text-base font-bold leading-relaxed" style={{ color: "#1a1a1a" }}>
+            <p dir="ltr" className="text-base font-bold leading-relaxed text-left" style={{ color: "#1a1a1a" }}>
               {currentQuestion.text_en}
             </p>
             {showTranslation && (
-              <p className="mt-2 text-sm leading-relaxed" style={{ color: "#6B7280" }}>
+              <p dir="rtl" className="mt-2 text-sm leading-relaxed text-right" style={{ color: "#6B7280" }}>
                 {currentQuestion.text_fa}
               </p>
             )}
@@ -306,10 +306,10 @@ function QuestionContent() {
                         ? "✕"
                         : opt.id}
                     </span>
-                    <span className="flex flex-col gap-0.5 text-right flex-1">
-                      <span className="text-base font-semibold">{opt.text_en}</span>
+                    <span className="flex flex-col gap-0.5 flex-1">
+                      <span dir="ltr" className="text-base font-semibold text-left block">{opt.text_en}</span>
                       {showTranslation && (
-                        <span className="text-xs" style={{ color: "#6B7280" }}>
+                        <span dir="rtl" className="text-xs text-right block" style={{ color: "#6B7280" }}>
                           {opt.text_fa}
                         </span>
                       )}
