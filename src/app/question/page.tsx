@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { questions } from "@/data/questions";
 
 const TOTAL_QUESTIONS = 10;
 const CURRENT_QUESTION = 3;
 
-// Use question id=1 as the demo question
-const demoQuestion = questions.find((q) => q.id === 1)!;
+const demoQuestion = questions.find((q) => q.id === 4)!;
 
 export default function QuestionPage() {
   const [selected, setSelected] = useState<string | null>(null);
@@ -17,16 +17,11 @@ export default function QuestionPage() {
   const [showTranslation, setShowTranslation] = useState(false);
 
   const isCorrect = selected === demoQuestion.correct;
+  const hasImageOptions = demoQuestion.options.some((o) => o.image_url);
 
   const handleSubmit = () => {
     if (!selected) return;
     setSubmitted(true);
-  };
-
-  const handleReset = () => {
-    setSelected(null);
-    setSubmitted(false);
-    setShowHint(false);
   };
 
   return (
@@ -35,28 +30,20 @@ export default function QuestionPage() {
       style={{ background: "#FFFDF7" }}
     >
       <div className="w-full max-w-sm flex flex-col gap-6">
-        {/* Top bar: progress dots + star */}
+        {/* Top bar */}
         <div className="flex items-center justify-between">
-          {/* Progress dots */}
           <div className="flex items-center gap-1.5">
             {Array.from({ length: TOTAL_QUESTIONS }).map((_, i) => (
               <span
                 key={i}
                 className="w-2.5 h-2.5 rounded-full transition-all duration-200"
                 style={{
-                  background:
-                    i < CURRENT_QUESTION
-                      ? "#42A5F5"
-                      : i === CURRENT_QUESTION - 1
-                      ? "#42A5F5"
-                      : "#D1D5DB",
+                  background: i < CURRENT_QUESTION ? "#42A5F5" : "#D1D5DB",
                   transform: i === CURRENT_QUESTION - 1 ? "scale(1.3)" : "scale(1)",
                 }}
               />
             ))}
           </div>
-
-          {/* Stars */}
           <div
             className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-bold"
             style={{ background: "#FFF9C4", color: "#F59E0B" }}
@@ -67,16 +54,15 @@ export default function QuestionPage() {
         </div>
 
         {/* Stage label */}
-        <div className="flex items-center gap-2">
+        <div>
           <span
             className="text-sm font-medium px-3 py-1 rounded-full"
             style={{ background: "#42A5F520", color: "#42A5F5" }}
           >
-            مرحله ۱: دنباله‌های عددی
+            مرحله ۲ — سوال بصری
           </span>
         </div>
 
-        {/* Divider */}
         <div style={{ height: "1px", background: "#E5E7EB" }} />
 
         {/* Question card */}
@@ -95,21 +81,20 @@ export default function QuestionPage() {
               : "none",
           }}
         >
-          {/* Question number + translation toggle row */}
+          {/* Question number + translation toggle */}
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium" style={{ color: "#9CA3AF" }}>
-              سوال شماره ۳
+              سوال شماره {CURRENT_QUESTION}
             </p>
             <button
               onClick={() => setShowTranslation((v) => !v)}
-              className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 hover:opacity-90 active:scale-95"
+              className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200"
               style={{
                 background: showTranslation ? "#42A5F5" : "#F3F4F6",
                 color: showTranslation ? "white" : "#6B7280",
               }}
             >
-              🌐{" "}
-              {showTranslation ? "پنهان کردن ترجمه" : "نمایش ترجمه"}
+              🌐 {showTranslation ? "پنهان ترجمه" : "نمایش ترجمه"}
             </button>
           </div>
 
@@ -119,17 +104,28 @@ export default function QuestionPage() {
               {demoQuestion.text_en}
             </p>
             {showTranslation && (
-              <p
-                className="mt-2 text-sm leading-relaxed"
-                style={{ color: "#6B7280" }}
-              >
+              <p className="mt-2 text-sm leading-relaxed" style={{ color: "#6B7280" }}>
                 {demoQuestion.text_fa}
               </p>
             )}
           </div>
 
+          {/* Question image (if any) */}
+          {demoQuestion.question_image_url && (
+            <div className="rounded-2xl overflow-hidden border border-gray-100">
+              <Image
+                src={demoQuestion.question_image_url}
+                alt="question image"
+                width={480}
+                height={200}
+                className="w-full h-auto object-contain"
+                unoptimized
+              />
+            </div>
+          )}
+
           {/* Options */}
-          <div className="flex flex-col gap-3">
+          <div className={`flex flex-col gap-3 ${hasImageOptions ? "" : ""}`}>
             {demoQuestion.options.map((opt) => {
               let borderColor = "#E5E7EB";
               let bg = "white";
@@ -156,7 +152,7 @@ export default function QuestionPage() {
                   key={opt.id}
                   onClick={() => !submitted && setSelected(opt.id)}
                   disabled={submitted}
-                  className="w-full flex items-center gap-3 p-4 rounded-2xl text-left transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                  className="w-full flex flex-col gap-2 p-3 rounded-2xl transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
                   style={{
                     border: `2px solid ${borderColor}`,
                     background: bg,
@@ -164,74 +160,74 @@ export default function QuestionPage() {
                     cursor: submitted ? "default" : "pointer",
                   }}
                 >
-                  {/* Radio indicator */}
-                  <span
-                    className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center"
-                    style={{
-                      border: `2px solid ${borderColor}`,
-                      background: selected === opt.id && !submitted ? "#42A5F5" : bg,
-                    }}
-                  >
-                    {submitted && opt.id === demoQuestion.correct && (
-                      <span style={{ color: "#66BB6A", fontSize: "12px" }}>✓</span>
-                    )}
-                    {submitted && opt.id === selected && !isCorrect && opt.id !== demoQuestion.correct && (
-                      <span style={{ color: "#EF5350", fontSize: "10px" }}>✕</span>
-                    )}
-                    {!submitted && selected === opt.id && (
-                      <span
-                        className="w-2.5 h-2.5 rounded-full"
-                        style={{ background: "white" }}
+                  {/* Option image (if any) */}
+                  {opt.image_url && (
+                    <div className="w-full rounded-xl overflow-hidden">
+                      <Image
+                        src={opt.image_url}
+                        alt={opt.text_en}
+                        width={300}
+                        height={150}
+                        className="w-full h-auto object-contain"
+                        unoptimized
                       />
-                    )}
-                  </span>
+                    </div>
+                  )}
 
-                  {/* Option label + text */}
-                  <span className="flex flex-col gap-0.5 flex-1">
-                    <span className="text-base font-semibold">
-                      {opt.id}. {opt.text_en}
+                  {/* Label + indicator row */}
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
+                      style={{
+                        border: `2px solid ${borderColor}`,
+                        background: selected === opt.id && !submitted ? "#42A5F5" : bg,
+                        color: selected === opt.id && !submitted ? "white" : textColor,
+                      }}
+                    >
+                      {submitted && opt.id === demoQuestion.correct ? "✓" :
+                       submitted && opt.id === selected && !isCorrect ? "✕" :
+                       opt.id}
                     </span>
-                    {showTranslation && (
-                      <span
-                        className="text-xs"
-                        style={{ color: submitted ? textColor : "#6B7280", opacity: 0.85 }}
-                      >
-                        {opt.text_fa}
-                      </span>
-                    )}
-                  </span>
+                    <span className="flex flex-col gap-0.5 text-right flex-1">
+                      <span className="text-base font-semibold">{opt.text_en}</span>
+                      {showTranslation && (
+                        <span className="text-xs" style={{ color: "#6B7280" }}>
+                          {opt.text_fa}
+                        </span>
+                      )}
+                    </span>
+                  </div>
                 </button>
               );
             })}
           </div>
 
-          {/* Feedback message */}
+          {/* Feedback */}
           {submitted && (
             <div
-              className="text-center py-3 px-4 rounded-2xl font-bold text-base transition-all duration-300"
+              className="text-center py-3 px-4 rounded-2xl font-bold text-base"
               style={{
                 background: isCorrect ? "#F0FDF4" : "#FFF5F5",
                 color: isCorrect ? "#166534" : "#991B1B",
               }}
             >
-              {isCorrect ? "🎉 آفرین! جواب درسته!" : "😅 اشتباهه، دوباره امتحان کن!"}
+              {isCorrect ? "🎉 آفرین! جواب درسته!" : "😅 اشتباه بود — جواب درست نشان داده شد"}
             </div>
           )}
 
-          {/* Hint box */}
+          {/* Hint */}
           {showHint && (
             <div
               className="py-3 px-4 rounded-2xl text-sm leading-relaxed font-medium"
               style={{ background: "#FFFDE7", color: "#92400E", border: "1.5px solid #FFD54F" }}
             >
-              💡 نگاه کن: ۱۲ میوه داریم، ۲ گلابی و ۴ سیب برداشته شد. پس ۶ تا پرتقال بوده. نصف پرتقال‌ها برداشته شد، پس...
+              💡 به قفسه‌ها دقت کن: کدام قفسه هیچ لاک‌پشت، خرگوش یا ربات ندارد؟
             </div>
           )}
         </div>
 
         {/* Action buttons */}
         <div className="flex gap-3 pb-8">
-          {/* Hint button */}
           <button
             onClick={() => setShowHint((v) => !v)}
             className="flex items-center gap-2 px-5 py-3 rounded-full font-bold text-base transition-all duration-200 hover:opacity-90 active:scale-95"
@@ -241,27 +237,15 @@ export default function QuestionPage() {
             <span>راهنما</span>
           </button>
 
-          {/* Continue / Reset button */}
           {submitted ? (
-            isCorrect ? (
-              <Link
-                href="/result"
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-full font-bold text-base text-white transition-all duration-200 hover:opacity-90 active:scale-95"
-                style={{ background: "#43A047" }}
-              >
-                <span>ادامه</span>
-                <span>▶</span>
-              </Link>
-            ) : (
-              <button
-                onClick={handleReset}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-full font-bold text-base text-white transition-all duration-200 hover:opacity-90 active:scale-95"
-                style={{ background: "#EF5350" }}
-              >
-                <span>دوباره</span>
-                <span>🔄</span>
-              </button>
-            )
+            <Link
+              href="/result"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-full font-bold text-base text-white transition-all duration-200 hover:opacity-90 active:scale-95"
+              style={{ background: isCorrect ? "#43A047" : "#6B7280" }}
+            >
+              <span>سوال بعد</span>
+              <span>▶</span>
+            </Link>
           ) : (
             <button
               onClick={handleSubmit}
@@ -270,7 +254,6 @@ export default function QuestionPage() {
               style={{
                 background: selected ? "#43A047" : "#D1D5DB",
                 cursor: selected ? "pointer" : "not-allowed",
-                transform: selected ? undefined : "none",
               }}
             >
               <span>ادامه</span>
