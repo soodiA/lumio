@@ -8,7 +8,7 @@ import { questions } from "@/data/questions";
 const TOTAL_QUESTIONS = 10;
 const CURRENT_QUESTION = 3;
 
-const demoQuestion = questions.find((q) => q.id === 4)!;
+const demoQuestion = questions.find((q) => q.id === 1)!;
 
 export default function QuestionPage() {
   const [selected, setSelected] = useState<string | null>(null);
