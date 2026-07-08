@@ -2,26 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { questions } from "@/data/questions";
 
 const TOTAL_QUESTIONS = 10;
 const CURRENT_QUESTION = 3;
 
-const options = [
-  { id: "a", value: "10" },
-  { id: "b", value: "11" },
-  { id: "c", value: "12" },
-  { id: "d", value: "14" },
-  { id: "e", value: "16" },
-];
-
-const CORRECT_ANSWER = "a"; // 10 is the correct answer for 2,4,6,8,?
+// Use question id=1 as the demo question
+const demoQuestion = questions.find((q) => q.id === 1)!;
 
 export default function QuestionPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [showTranslation, setShowTranslation] = useState(false);
 
-  const isCorrect = selected === CORRECT_ANSWER;
+  const isCorrect = selected === demoQuestion.correct;
 
   const handleSubmit = () => {
     if (!selected) return;
@@ -100,41 +95,48 @@ export default function QuestionPage() {
               : "none",
           }}
         >
-          {/* Question number */}
-          <p className="text-sm font-medium" style={{ color: "#9CA3AF" }}>
-            سوال شماره ۳
-          </p>
+          {/* Question number + translation toggle row */}
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium" style={{ color: "#9CA3AF" }}>
+              سوال شماره ۳
+            </p>
+            <button
+              onClick={() => setShowTranslation((v) => !v)}
+              className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 hover:opacity-90 active:scale-95"
+              style={{
+                background: showTranslation ? "#42A5F5" : "#F3F4F6",
+                color: showTranslation ? "white" : "#6B7280",
+              }}
+            >
+              🌐{" "}
+              {showTranslation ? "پنهان کردن ترجمه" : "نمایش ترجمه"}
+            </button>
+          </div>
 
           {/* Question text */}
-          <p className="text-lg font-bold leading-relaxed" style={{ color: "#1a1a1a" }}>
-            عدد بعدی را پیدا کن:
-          </p>
-
-          {/* Sequence display */}
-          <div
-            className="flex items-center justify-center gap-3 py-4 px-4 rounded-2xl text-2xl font-bold"
-            style={{ background: "#F0F9FF", color: "#42A5F5" }}
-          >
-            <span>۲</span>
-            <span style={{ color: "#CBD5E1" }}>—</span>
-            <span>۴</span>
-            <span style={{ color: "#CBD5E1" }}>—</span>
-            <span>۶</span>
-            <span style={{ color: "#CBD5E1" }}>—</span>
-            <span>۸</span>
-            <span style={{ color: "#CBD5E1" }}>—</span>
-            <span style={{ color: "#1a1a1a" }}>؟</span>
+          <div>
+            <p className="text-base font-bold leading-relaxed" style={{ color: "#1a1a1a" }}>
+              {demoQuestion.text_en}
+            </p>
+            {showTranslation && (
+              <p
+                className="mt-2 text-sm leading-relaxed"
+                style={{ color: "#6B7280" }}
+              >
+                {demoQuestion.text_fa}
+              </p>
+            )}
           </div>
 
           {/* Options */}
           <div className="flex flex-col gap-3">
-            {options.map((opt) => {
+            {demoQuestion.options.map((opt) => {
               let borderColor = "#E5E7EB";
               let bg = "white";
               let textColor = "#1a1a1a";
 
               if (submitted) {
-                if (opt.id === CORRECT_ANSWER) {
+                if (opt.id === demoQuestion.correct) {
                   borderColor = "#66BB6A";
                   bg = "#F0FDF4";
                   textColor = "#166534";
@@ -154,7 +156,7 @@ export default function QuestionPage() {
                   key={opt.id}
                   onClick={() => !submitted && setSelected(opt.id)}
                   disabled={submitted}
-                  className="w-full flex items-center gap-3 p-4 rounded-2xl text-right transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                  className="w-full flex items-center gap-3 p-4 rounded-2xl text-left transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
                   style={{
                     border: `2px solid ${borderColor}`,
                     background: bg,
@@ -170,10 +172,10 @@ export default function QuestionPage() {
                       background: selected === opt.id && !submitted ? "#42A5F5" : bg,
                     }}
                   >
-                    {submitted && opt.id === CORRECT_ANSWER && (
+                    {submitted && opt.id === demoQuestion.correct && (
                       <span style={{ color: "#66BB6A", fontSize: "12px" }}>✓</span>
                     )}
-                    {submitted && opt.id === selected && !isCorrect && opt.id !== CORRECT_ANSWER && (
+                    {submitted && opt.id === selected && !isCorrect && opt.id !== demoQuestion.correct && (
                       <span style={{ color: "#EF5350", fontSize: "10px" }}>✕</span>
                     )}
                     {!submitted && selected === opt.id && (
@@ -184,7 +186,20 @@ export default function QuestionPage() {
                     )}
                   </span>
 
-                  <span className="text-lg font-semibold">{opt.value}</span>
+                  {/* Option label + text */}
+                  <span className="flex flex-col gap-0.5 flex-1">
+                    <span className="text-base font-semibold">
+                      {opt.id}. {opt.text_en}
+                    </span>
+                    {showTranslation && (
+                      <span
+                        className="text-xs"
+                        style={{ color: submitted ? textColor : "#6B7280", opacity: 0.85 }}
+                      >
+                        {opt.text_fa}
+                      </span>
+                    )}
+                  </span>
                 </button>
               );
             })}
@@ -209,7 +224,7 @@ export default function QuestionPage() {
               className="py-3 px-4 rounded-2xl text-sm leading-relaxed font-medium"
               style={{ background: "#FFFDE7", color: "#92400E", border: "1.5px solid #FFD54F" }}
             >
-              💡 نگاه کن: هر عدد ۲ تا بیشتر از قبلیه. ۲، ۴، ۶، ۸... عدد بعدی چقدر میشه؟
+              💡 نگاه کن: ۱۲ میوه داریم، ۲ گلابی و ۴ سیب برداشته شد. پس ۶ تا پرتقال بوده. نصف پرتقال‌ها برداشته شد، پس...
             </div>
           )}
         </div>
