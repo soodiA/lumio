@@ -75,9 +75,18 @@ function QuestionContent() {
   const [coins, setCoins] = useState(0);
   const [coinDelta, setCoinDelta] = useState<number | null>(null);
 
+  // Load coins once on mount
   useEffect(() => {
     setCoins(getCoinsFromStorage());
   }, []);
+
+  // Reset per-question state whenever the question index changes
+  useEffect(() => {
+    setSelected(null);
+    setSubmitted(false);
+    setShowHint(false);
+    setCoinDelta(null);
+  }, [qIndex, grade, stage]);
 
   const isCorrect = selected === currentQuestion.correct;
 
