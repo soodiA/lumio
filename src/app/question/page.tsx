@@ -1,14 +1,22 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import Link from "next/link";
+import { useState, useMemo, useEffect, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { questions, QuestionOption } from "@/data/questions";
 
-const TOTAL_QUESTIONS = 10;
-const CURRENT_QUESTION = 3;
+const QUESTIONS_PER_STAGE = 10;
 
-const demoQuestion = questions.find((q) => q.id === 1)!;
+function shuffleWithSeed<T>(arr: T[], seed: number): T[] {
+  const copy = [...arr];
+  let s = seed;
+  for (let i = copy.length - 1; i > 0; i--) {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    const j = Math.abs(s) % (i + 1);
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
 
 function shuffleArray<T>(arr: T[]): T[] {
   const copy = [...arr];
@@ -19,26 +27,107 @@ function shuffleArray<T>(arr: T[]): T[] {
   return copy;
 }
 
-export default function QuestionPage() {
+function getCoinsFromStorage(): number {
+  if (typeof window === "undefined") return 0;
+  return parseInt(localStorage.getItem("lumio_coins") ?? "0", 10);
+}
+
+function setCoinsToStorage(coins: number) {
+  localStorage.setItem("lumio_coins", String(Math.max(0, coins)));
+}
+
+function QuestionContent() {
+  const params = useSearchParams();
+  const router = useRouter();
+
+  const grade = params.get("grade") ?? "1-2";
+  const stage = parseInt(params.get("stage") ?? "1", 10);
+  const qIndex = parseInt(params.get("q") ?? "0", 10);
+
+  // Coins per correct answer: stages 1-4 → 5, stages 5+ → 2
+  const coinsPerCorrect = stage <= 4 ? 5 : 2;
+
+  // Build the 10-question list for this stage (seeded by stage so same questions on retry)
+  const stageQuestions = useMemo(() => {
+    const pool = questions.filter((q) => q.grade_group === grade);
+    if (pool.length === 0) return questions.slice(0, QUESTIONS_PER_STAGE);
+    const seeded = shuffleWithSeed(pool, stage * 1000 + grade.charCodeAt(0));
+    const result = [];
+    for (let i = 0; i < QUESTIONS_PER_STAGE; i++) {
+      result.push(seeded[i % seeded.length]);
+    }
+    return result;
+  }, [grade, stage]);
+
+  const currentQuestion = stageQuestions[qIndex];
+
+  // Shuffle this question's options randomly (fresh on each question load)
+  const shuffledOptions = useMemo<QuestionOption[]>(
+    () => shuffleArray(currentQuestion.options),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentQuestion.id, qIndex]
+  );
+
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [showTranslation, setShowTranslation] = useState(false);
+  const [coins, setCoins] = useState(0);
+  const [coinDelta, setCoinDelta] = useState<number | null>(null);
 
-  // Shuffle options once when page loads — stable across re-renders
-  const shuffledOptions = useMemo<QuestionOption[]>(
-    () => shuffleArray(demoQuestion.options),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  useEffect(() => {
+    setCoins(getCoinsFromStorage());
+  }, []);
 
-  const isCorrect = selected === demoQuestion.correct;
-  const hasImageOptions = demoQuestion.options.some((o) => o.image_url);
+  const isCorrect = selected === currentQuestion.correct;
 
   const handleSubmit = () => {
     if (!selected) return;
     setSubmitted(true);
+
+    let delta = 0;
+    if (selected === currentQuestion.correct) {
+      delta = coinsPerCorrect;
+    }
+    const newCoins = Math.max(0, coins + delta);
+    setCoins(newCoins);
+    setCoinsToStorage(newCoins);
+    if (delta !== 0) setCoinDelta(delta);
   };
+
+  const handleHint = () => {
+    if (showHint) { setShowHint(false); return; }
+    setShowHint(true);
+    const newCoins = Math.max(0, coins - 10);
+    setCoins(newCoins);
+    setCoinsToStorage(newCoins);
+    setCoinDelta(-10);
+    setTimeout(() => setCoinDelta(null), 1500);
+  };
+
+  const handleNext = () => {
+    const nextQ = qIndex + 1;
+    // Track wrong answers in sessionStorage
+    if (!isCorrect) {
+      const key = `lumio_session_${grade}_${stage}`;
+      const prev = parseInt(sessionStorage.getItem(key) ?? "0", 10);
+      sessionStorage.setItem(key, String(prev + 1));
+    }
+
+    if (nextQ >= QUESTIONS_PER_STAGE) {
+      const wrongKey = `lumio_session_${grade}_${stage}`;
+      const wrongCount = parseInt(sessionStorage.getItem(wrongKey) ?? "0", 10);
+      // Clear session tracker
+      sessionStorage.removeItem(wrongKey);
+      router.push(
+        `/result?grade=${grade}&stage=${stage}&wrong=${wrongCount}`
+      );
+    } else {
+      router.push(`/question?grade=${grade}&stage=${stage}&q=${nextQ}`);
+    }
+  };
+
+  if (!currentQuestion) return null;
 
   return (
     <main
@@ -49,23 +138,34 @@ export default function QuestionPage() {
         {/* Top bar */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            {Array.from({ length: TOTAL_QUESTIONS }).map((_, i) => (
+            {Array.from({ length: QUESTIONS_PER_STAGE }).map((_, i) => (
               <span
                 key={i}
                 className="w-2.5 h-2.5 rounded-full transition-all duration-200"
                 style={{
-                  background: i < CURRENT_QUESTION ? "#42A5F5" : "#D1D5DB",
-                  transform: i === CURRENT_QUESTION - 1 ? "scale(1.3)" : "scale(1)",
+                  background: i <= qIndex ? "#42A5F5" : "#D1D5DB",
+                  transform: i === qIndex ? "scale(1.3)" : "scale(1)",
                 }}
               />
             ))}
           </div>
-          <div
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-bold"
-            style={{ background: "#FFF9C4", color: "#F59E0B" }}
-          >
-            <span>⭐</span>
-            <span>۱۲۰</span>
+          {/* Coins */}
+          <div className="relative">
+            <div
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-bold"
+              style={{ background: "#FFF9C4", color: "#F59E0B" }}
+            >
+              <span>🪙</span>
+              <span>{coins}</span>
+            </div>
+            {coinDelta !== null && (
+              <span
+                className="absolute -top-5 left-1/2 -translate-x-1/2 text-sm font-bold animate-bounce"
+                style={{ color: coinDelta > 0 ? "#43A047" : "#EF5350" }}
+              >
+                {coinDelta > 0 ? `+${coinDelta}` : coinDelta}
+              </span>
+            )}
           </div>
         </div>
 
@@ -75,7 +175,7 @@ export default function QuestionPage() {
             className="text-sm font-medium px-3 py-1 rounded-full"
             style={{ background: "#42A5F520", color: "#42A5F5" }}
           >
-            مرحله ۱
+            مرحله {stage} — سوال {qIndex + 1} از {QUESTIONS_PER_STAGE}
           </span>
         </div>
 
@@ -100,7 +200,7 @@ export default function QuestionPage() {
           {/* Question number + translation toggle */}
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium" style={{ color: "#9CA3AF" }}>
-              سوال شماره {CURRENT_QUESTION}
+              سوال {qIndex + 1}
             </p>
             <button
               onClick={() => setShowTranslation((v) => !v)}
@@ -117,20 +217,20 @@ export default function QuestionPage() {
           {/* Question text */}
           <div>
             <p className="text-base font-bold leading-relaxed" style={{ color: "#1a1a1a" }}>
-              {demoQuestion.text_en}
+              {currentQuestion.text_en}
             </p>
             {showTranslation && (
               <p className="mt-2 text-sm leading-relaxed" style={{ color: "#6B7280" }}>
-                {demoQuestion.text_fa}
+                {currentQuestion.text_fa}
               </p>
             )}
           </div>
 
-          {/* Question image (if any) */}
-          {demoQuestion.question_image_url && (
+          {/* Question image */}
+          {currentQuestion.question_image_url && (
             <div className="rounded-2xl overflow-hidden border border-gray-100">
               <Image
-                src={demoQuestion.question_image_url}
+                src={currentQuestion.question_image_url}
                 alt="question image"
                 width={480}
                 height={200}
@@ -140,7 +240,7 @@ export default function QuestionPage() {
             </div>
           )}
 
-          {/* Options — rendered in shuffled order */}
+          {/* Options */}
           <div className="flex flex-col gap-3">
             {shuffledOptions.map((opt) => {
               let borderColor = "#E5E7EB";
@@ -148,19 +248,13 @@ export default function QuestionPage() {
               let textColor = "#1a1a1a";
 
               if (submitted) {
-                if (opt.id === demoQuestion.correct) {
-                  borderColor = "#66BB6A";
-                  bg = "#F0FDF4";
-                  textColor = "#166534";
+                if (opt.id === currentQuestion.correct) {
+                  borderColor = "#66BB6A"; bg = "#F0FDF4"; textColor = "#166534";
                 } else if (opt.id === selected && !isCorrect) {
-                  borderColor = "#EF5350";
-                  bg = "#FFF5F5";
-                  textColor = "#991B1B";
+                  borderColor = "#EF5350"; bg = "#FFF5F5"; textColor = "#991B1B";
                 }
               } else if (selected === opt.id) {
-                borderColor = "#42A5F5";
-                bg = "#EFF6FF";
-                textColor = "#1D4ED8";
+                borderColor = "#42A5F5"; bg = "#EFF6FF"; textColor = "#1D4ED8";
               }
 
               return (
@@ -176,7 +270,6 @@ export default function QuestionPage() {
                     cursor: submitted ? "default" : "pointer",
                   }}
                 >
-                  {/* Option image (if any) */}
                   {opt.image_url && (
                     <div className="w-full rounded-xl overflow-hidden">
                       <Image
@@ -189,8 +282,6 @@ export default function QuestionPage() {
                       />
                     </div>
                   )}
-
-                  {/* Label + indicator row */}
                   <div className="flex items-center gap-3">
                     <span
                       className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
@@ -200,7 +291,7 @@ export default function QuestionPage() {
                         color: selected === opt.id && !submitted ? "white" : textColor,
                       }}
                     >
-                      {submitted && opt.id === demoQuestion.correct
+                      {submitted && opt.id === currentQuestion.correct
                         ? "✓"
                         : submitted && opt.id === selected && !isCorrect
                         ? "✕"
@@ -229,7 +320,9 @@ export default function QuestionPage() {
                 color: isCorrect ? "#166534" : "#991B1B",
               }}
             >
-              {isCorrect ? "🎉 آفرین! جواب درسته!" : "😅 اشتباه بود — جواب درست نشان داده شد"}
+              {isCorrect
+                ? `🎉 آفرین! +${coinsPerCorrect} سکه`
+                : "😅 اشتباه بود — جواب درست نشان داده شد"}
             </div>
           )}
 
@@ -239,7 +332,7 @@ export default function QuestionPage() {
               className="py-3 px-4 rounded-2xl text-sm leading-relaxed font-medium"
               style={{ background: "#FFFDE7", color: "#92400E", border: "1.5px solid #FFD54F" }}
             >
-              💡 به قفسه‌ها دقت کن: کدام قفسه هیچ لاک‌پشت، خرگوش یا ربات ندارد؟
+              💡 {currentQuestion.text_fa}
             </div>
           )}
         </div>
@@ -247,23 +340,24 @@ export default function QuestionPage() {
         {/* Action buttons */}
         <div className="flex gap-3 pb-8">
           <button
-            onClick={() => setShowHint((v) => !v)}
-            className="flex items-center gap-2 px-5 py-3 rounded-full font-bold text-base transition-all duration-200 hover:opacity-90 active:scale-95"
+            onClick={handleHint}
+            disabled={submitted}
+            className="flex items-center gap-2 px-4 py-3 rounded-full font-bold text-sm transition-all duration-200 hover:opacity-90 active:scale-95 disabled:opacity-40"
             style={{ background: "#FFD54F", color: "#78350F" }}
           >
             <span>💡</span>
-            <span>راهنما</span>
+            <span>راهنما −۱۰</span>
           </button>
 
           {submitted ? (
-            <Link
-              href="/result"
+            <button
+              onClick={handleNext}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-full font-bold text-base text-white transition-all duration-200 hover:opacity-90 active:scale-95"
               style={{ background: isCorrect ? "#43A047" : "#6B7280" }}
             >
-              <span>سوال بعد</span>
+              <span>{qIndex + 1 >= QUESTIONS_PER_STAGE ? "نتیجه" : "سوال بعد"}</span>
               <span>▶</span>
-            </Link>
+            </button>
           ) : (
             <button
               onClick={handleSubmit}
@@ -281,5 +375,13 @@ export default function QuestionPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function QuestionPage() {
+  return (
+    <Suspense>
+      <QuestionContent />
+    </Suspense>
   );
 }

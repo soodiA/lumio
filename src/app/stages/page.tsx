@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 const STAGE_COUNT = 6;
 const STAGE_COLORS = ["#42A5F5", "#66BB6A", "#FFA726", "#AB47BC", "#EF5350", "#26C6DA"];
@@ -11,6 +11,13 @@ const STAGE_EMOJIS = ["⭐", "🌟", "🔥", "💎", "🚀", "🏆"];
 function StagesContent() {
   const params = useSearchParams();
   const grade = params.get("grade") ?? "1-2";
+  const [unlockedStages, setUnlockedStages] = useState<number[]>([1]);
+
+  useEffect(() => {
+    const key = `lumio_unlocked_${grade}`;
+    const stored = JSON.parse(localStorage.getItem(key) ?? "[1]") as number[];
+    setUnlockedStages(stored);
+  }, [grade]);
 
   const gradeLabel: Record<string, string> = {
     "1-2": "پایه اول و دوم",
@@ -23,7 +30,7 @@ function StagesContent() {
 
   const stages = Array.from({ length: STAGE_COUNT }, (_, i) => ({
     id: i + 1,
-    locked: i > 0,
+    locked: !unlockedStages.includes(i + 1),
     color: STAGE_COLORS[i],
     emoji: STAGE_EMOJIS[i],
   }));
