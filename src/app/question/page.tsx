@@ -61,12 +61,7 @@ function QuestionContent() {
 
   const currentQuestion = stageQuestions[qIndex];
 
-  // Shuffle this question's options randomly (fresh on each question load)
-  const shuffledOptions = useMemo<QuestionOption[]>(
-    () => shuffleArray(currentQuestion.options),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentQuestion.id, qIndex]
-  );
+  const shuffledOptions = currentQuestion.options;
 
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
