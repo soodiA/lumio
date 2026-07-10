@@ -29,11 +29,11 @@ function shuffleArray<T>(arr: T[]): T[] {
 
 function getCoinsFromStorage(): number {
   if (typeof window === "undefined") return 0;
-  return parseInt(localStorage.getItem("lumio_coins") ?? "0", 10);
+  try { return parseInt(localStorage.getItem("lumio_coins") ?? "0", 10); } catch { return 0; }
 }
 
 function setCoinsToStorage(coins: number) {
-  localStorage.setItem("lumio_coins", String(Math.max(0, coins)));
+  try { localStorage.setItem("lumio_coins", String(Math.max(0, coins))); } catch { /* ignore */ }
 }
 
 function QuestionContent() {
@@ -114,23 +114,24 @@ function QuestionContent() {
     setTimeout(() => setCoinDelta(null), 1500);
   };
 
+  const safeSession = {
+    get: (key: string) => { try { return sessionStorage.getItem(key); } catch { return null; } },
+    set: (key: string, val: string) => { try { sessionStorage.setItem(key, val); } catch { /* ignore */ } },
+    remove: (key: string) => { try { sessionStorage.removeItem(key); } catch { /* ignore */ } },
+  };
+
   const handleNext = () => {
     const nextQ = qIndex + 1;
-    // Track wrong answers in sessionStorage
+    const key = `lumio_session_${grade}_${stage}`;
     if (!isCorrect) {
-      const key = `lumio_session_${grade}_${stage}`;
-      const prev = parseInt(sessionStorage.getItem(key) ?? "0", 10);
-      sessionStorage.setItem(key, String(prev + 1));
+      const prev = parseInt(safeSession.get(key) ?? "0", 10);
+      safeSession.set(key, String(prev + 1));
     }
 
     if (nextQ >= QUESTIONS_PER_STAGE) {
-      const wrongKey = `lumio_session_${grade}_${stage}`;
-      const wrongCount = parseInt(sessionStorage.getItem(wrongKey) ?? "0", 10);
-      // Clear session tracker
-      sessionStorage.removeItem(wrongKey);
-      router.push(
-        `/result?grade=${grade}&stage=${stage}&wrong=${wrongCount}`
-      );
+      const wrongCount = parseInt(safeSession.get(key) ?? "0", 10);
+      safeSession.remove(key);
+      router.push(`/result?grade=${grade}&stage=${stage}&wrong=${wrongCount}`);
     } else {
       router.push(`/question?grade=${grade}&stage=${stage}&q=${nextQ}`);
     }
