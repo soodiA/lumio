@@ -12,6 +12,7 @@ export interface Question {
   text_en: string;
   text_fa: string;
   question_image_url?: string;
+  question_image_small?: boolean;
   options: QuestionOption[];
   correct: string;
   skills: string[];
@@ -27,6 +28,8 @@ export const questions: Question[] = [
     id: 1, stage: 1, level: "3pt", year: 2014, grade_group: "1-2",
     text_en: "The ladybird would like to sit on his flower. The flower has five petals and the stem has three leaves. On which flower should the ladybird sit?",
     text_fa: "کفشدوزک می‌خواهد روی گل خودش بنشیند. گل پنج گلبرگ و ساقه سه برگ دارد. روی کدام گل باید بنشیند؟",
+    question_image_url: `${BASE}/felix-2014-img-000.png`,
+    question_image_small: true,
     options: [
       { id: "A", text_en: "A", text_fa: "الف", image_url: `${BASE}/felix-2014-img-001.png` },
       { id: "B", text_en: "B", text_fa: "ب", image_url: `${BASE}/felix-2014-img-002.png` },

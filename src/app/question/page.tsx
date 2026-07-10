@@ -237,16 +237,30 @@ function QuestionContent() {
 
           {/* Question image */}
           {currentQuestion.question_image_url && (
-            <div className="rounded-2xl overflow-hidden border border-gray-100">
-              <Image
-                src={currentQuestion.question_image_url}
-                alt="question image"
-                width={480}
-                height={200}
-                className="w-full h-auto object-contain"
-                unoptimized
-              />
-            </div>
+            currentQuestion.question_image_small ? (
+              <div className="flex justify-center">
+                <Image
+                  src={currentQuestion.question_image_url}
+                  alt="question image"
+                  width={80}
+                  height={80}
+                  className="object-contain"
+                  style={{ width: 80, height: 80 }}
+                  unoptimized
+                />
+              </div>
+            ) : (
+              <div className="rounded-2xl overflow-hidden border border-gray-100">
+                <Image
+                  src={currentQuestion.question_image_url}
+                  alt="question image"
+                  width={480}
+                  height={200}
+                  className="w-full h-auto object-contain"
+                  unoptimized
+                />
+              </div>
+            )
           )}
 
           {/* Options */}
