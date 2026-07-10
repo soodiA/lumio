@@ -21,6 +21,13 @@ function ResultContent() {
     const coins = parseInt(localStorage.getItem("lumio_coins") ?? "0", 10);
     setTotalCoins(coins);
 
+    // Save best score for this stage
+    const scoreKey = `lumio_score_${grade}_${stage}`;
+    const prevBest = parseInt(localStorage.getItem(scoreKey) ?? "0", 10);
+    if (correctCount > prevBest) {
+      localStorage.setItem(scoreKey, String(correctCount));
+    }
+
     // Unlock next stage if passed
     if (passed) {
       const key = `lumio_unlocked_${grade}`;
@@ -31,7 +38,7 @@ function ResultContent() {
         localStorage.setItem(key, JSON.stringify(current));
       }
     }
-  }, [grade, stage, passed]);
+  }, [grade, stage, passed, correctCount]);
 
   const stars = wrongCount === 0 ? 3 : wrongCount <= 1 ? 2 : passed ? 1 : 0;
 
