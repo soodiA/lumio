@@ -5,8 +5,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { questions, QuestionOption } from "@/data/questions";
 
-const QUESTIONS_PER_STAGE = 10;
-
 function shuffleWithSeed<T>(arr: T[], seed: number): T[] {
   const copy = [...arr];
   let s = seed;
@@ -47,17 +45,14 @@ function QuestionContent() {
   // Coins per correct answer: stages 1-4 → 5, stages 5+ → 2
   const coinsPerCorrect = stage <= 4 ? 5 : 2;
 
-  // Build the 10-question list for this stage (seeded by stage so same questions on retry)
+  // Build the question list for this stage (seeded by stage so same order on retry)
   const stageQuestions = useMemo(() => {
     const pool = questions.filter((q) => q.grade_group === grade && q.stage === stage);
-    if (pool.length === 0) return questions.slice(0, QUESTIONS_PER_STAGE);
-    const seeded = shuffleWithSeed(pool, stage * 1000 + grade.charCodeAt(0));
-    const result = [];
-    for (let i = 0; i < QUESTIONS_PER_STAGE; i++) {
-      result.push(seeded[i % seeded.length]);
-    }
-    return result;
+    if (pool.length === 0) return questions.slice(0, 10);
+    return shuffleWithSeed(pool, stage * 1000 + grade.charCodeAt(0));
   }, [grade, stage]);
+
+  const totalQuestions = stageQuestions.length;
 
   const currentQuestion = stageQuestions[qIndex];
 
@@ -123,7 +118,7 @@ function QuestionContent() {
       safeSession.set(key, String(prev + 1));
     }
 
-    if (nextQ >= QUESTIONS_PER_STAGE) {
+    if (nextQ >= totalQuestions) {
       const wrongCount = parseInt(safeSession.get(key) ?? "0", 10);
       safeSession.remove(key);
       router.push(`/result?grade=${grade}&stage=${stage}&wrong=${wrongCount}`);
@@ -143,7 +138,7 @@ function QuestionContent() {
         {/* Top bar */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            {Array.from({ length: QUESTIONS_PER_STAGE }).map((_, i) => (
+            {Array.from({ length: totalQuestions }).map((_, i) => (
               <span
                 key={i}
                 className="w-2.5 h-2.5 rounded-full transition-all duration-200"
@@ -180,7 +175,7 @@ function QuestionContent() {
             className="text-sm font-medium px-3 py-1 rounded-full"
             style={{ background: "#42A5F520", color: "#42A5F5" }}
           >
-            مرحله {stage} — سوال {qIndex + 1} از {QUESTIONS_PER_STAGE}
+            مرحله {stage} — سوال {qIndex + 1} از {totalQuestions}
           </span>
         </div>
 
@@ -290,13 +285,14 @@ function QuestionContent() {
                   }}
                 >
                   {opt.image_url && (
-                    <div className="w-full rounded-xl overflow-hidden">
+                    <div className="w-full flex justify-center rounded-xl overflow-hidden">
                       <Image
                         src={opt.image_url}
                         alt={opt.text_en}
-                        width={300}
-                        height={150}
-                        className="w-full h-auto object-contain"
+                        width={200}
+                        height={100}
+                        className="h-auto object-contain"
+                        style={{ maxHeight: 90 }}
                         unoptimized
                       />
                     </div>
@@ -374,7 +370,7 @@ function QuestionContent() {
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-full font-bold text-base text-white transition-all duration-200 hover:opacity-90 active:scale-95"
               style={{ background: isCorrect ? "#43A047" : "#6B7280" }}
             >
-              <span>{qIndex + 1 >= QUESTIONS_PER_STAGE ? "نتیجه" : "سوال بعد"}</span>
+              <span>{qIndex + 1 >= totalQuestions ? "نتیجه" : "سوال بعد"}</span>
               <span>▶</span>
             </button>
           ) : (

@@ -149,7 +149,7 @@ export const questions: Question[] = [
     id: 9, stage: 1, level: "4pt", year: 2014, grade_group: "1-2",
     text_en: "Max has cut a rectangle into two pieces. One piece looks like the image shown. What does the other piece look like?",
     text_fa: "ماکس یک مستطیل را به دو قطعه برید. یک قطعه مانند تصویر است. قطعه دیگر چه شکلی دارد؟",
-    question_image_url: `${BASE}/felix-2014-img-072.png`,
+    question_image_url: `${BASE}/felix-2014-img-065.png`,
     options: [
       { id: "A", text_en: "A", text_fa: "الف", image_url: `${BASE}/felix-2014-img-052.png` },
       { id: "B", text_en: "B", text_fa: "ب", image_url: `${BASE}/felix-2014-img-054.png` },
@@ -193,6 +193,8 @@ export const questions: Question[] = [
     id: 12, stage: 1, level: "5pt", year: 2014, grade_group: "1-2",
     text_en: "The rabbit family Hoppel eat cabbages and carrots. Each day they eat either 10 carrots or 2 cabbages. In the whole of last week they ate 6 cabbages. How many carrots did the rabbit family eat last week?",
     text_fa: "خانواده خرگوش هوپل هر روز یا ۱۰ هویج یا ۲ کلم می‌خورند. هفته گذشته ۶ کلم خوردند. چند هویج خوردند؟",
+    question_image_url: `${BASE}/felix-2014-img-074.png`,
+    question_image_small: true,
     options: [
       { id: "A", text_en: "20", text_fa: "۲۰" },
       { id: "B", text_en: "30", text_fa: "۳۰" },
@@ -207,6 +209,8 @@ export const questions: Question[] = [
     id: 13, stage: 1, level: "5pt", year: 2014, grade_group: "1-2",
     text_en: "A square is cut into four pieces. Which shape can you NOT make with these four pieces?",
     text_fa: "یک مربع به ۴ قطعه بریده می‌شود. کدام شکل از این چهار قطعه ساخته نمی‌شود؟",
+    question_image_url: `${BASE}/felix-2014-img-072.png`,
+    question_image_small: true,
     options: [
       { id: "A", text_en: "A", text_fa: "الف", image_url: `${BASE}/felix-2014-img-067.png` },
       { id: "B", text_en: "B", text_fa: "ب", image_url: `${BASE}/felix-2014-img-068.png` },
