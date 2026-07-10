@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 
-const STAGE_COUNT = 7; // stages 1-7 (years 2014-2020)
+const STAGE_COUNT = 8; // stages 1-8 (years 2014-2021)
 const TOTAL_QUESTIONS = 10;
 const STAGE_COLORS = ["#42A5F5", "#66BB6A", "#FFA726", "#AB47BC", "#EF5350", "#26C6DA"];
 const STAGE_EMOJIS = ["⭐", "🌟", "🔥", "💎", "🚀", "🏆"];
