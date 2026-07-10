@@ -49,7 +49,7 @@ function QuestionContent() {
 
   // Build the 10-question list for this stage (seeded by stage so same questions on retry)
   const stageQuestions = useMemo(() => {
-    const pool = questions.filter((q) => q.grade_group === grade);
+    const pool = questions.filter((q) => q.grade_group === grade && q.stage === stage);
     if (pool.length === 0) return questions.slice(0, QUESTIONS_PER_STAGE);
     const seeded = shuffleWithSeed(pool, stage * 1000 + grade.charCodeAt(0));
     const result = [];
