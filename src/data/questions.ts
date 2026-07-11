@@ -1049,6 +1049,7 @@ export const questions: Question[] = [
     text_en: "Lisa needs exactly 3 pieces to complete her jigsaw. Which of the 4 pieces is left over?",
     text_fa: "لیزا دقیقاً ۳ تکه برای تکمیل پازلش نیاز دارد. کدام یک از ۴ تکه اضافه می‌ماند؟",
     question_image_url: `${BASE}/felix-2018-img-023.png`,
+    question_extra_images: [`${BASE}/felix-2018-img-022.png`],
     options: [
       { id: "A", text_en: "A", text_fa: "الف" },
       { id: "B", text_en: "B", text_fa: "ب" },
