@@ -233,10 +233,10 @@ function QuestionContent() {
                 <Image
                   src={currentQuestion.question_image_url}
                   alt="question image"
-                  width={80}
-                  height={80}
+                  width={150}
+                  height={150}
                   className="object-contain"
-                  style={{ width: 80, height: 80 }}
+                  style={{ maxWidth: 150, maxHeight: 150 }}
                   unoptimized
                 />
               </div>
