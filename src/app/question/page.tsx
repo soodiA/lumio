@@ -336,8 +336,10 @@ function QuestionContent() {
                         : opt.id}
                     </span>
                     <span className="flex flex-col gap-0.5 flex-1">
-                      <span dir="ltr" className="text-base font-semibold text-left block">{opt.text_en}</span>
-                      {showTranslation && (
+                      {!opt.image_url && (
+                        <span dir="ltr" className="text-base font-semibold text-left block">{opt.text_en}</span>
+                      )}
+                      {showTranslation && !opt.image_url && (
                         <span dir="rtl" className="text-xs text-right block" style={{ color: "#6B7280" }}>
                           {opt.text_fa}
                         </span>
