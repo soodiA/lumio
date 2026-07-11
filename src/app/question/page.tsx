@@ -240,6 +240,18 @@ function QuestionContent() {
                   unoptimized
                 />
               </div>
+            ) : currentQuestion.question_image_strip ? (
+              <div className="rounded-2xl border border-gray-100 overflow-x-auto">
+                <Image
+                  src={currentQuestion.question_image_url}
+                  alt="question image"
+                  width={900}
+                  height={120}
+                  className="h-auto object-contain"
+                  style={{ minWidth: 600, minHeight: 100 }}
+                  unoptimized
+                />
+              </div>
             ) : (
               <div className="rounded-2xl overflow-hidden border border-gray-100">
                 <Image

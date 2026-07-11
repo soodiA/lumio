@@ -13,6 +13,7 @@ export interface Question {
   text_fa: string;
   question_image_url?: string;
   question_image_small?: boolean;
+  question_image_strip?: boolean;
   options: QuestionOption[];
   correct: string;
   skills: string[];
@@ -672,7 +673,7 @@ export const questions: Question[] = [
     text_en: "In the picture five ladybirds can be seen, each sitting on a certain flower. A ladybird is only allowed to sit on a flower if: (1) The difference between the number of points on each wing equals the number of leaves on the stem. (2) The total number of points equals the number of petals. Which flower is without a ladybird?",
     text_fa: "در تصویر پنج کفشدوزک روی گل‌ها نشسته‌اند. شرط نشستن کفشدوزک: (۱) تفاوت نقطه‌های دو بال برابر تعداد برگ‌های ساقه است. (۲) مجموع نقطه‌ها برابر تعداد گلبرگ‌هاست. کدام گل بدون کفشدوزک است؟",
     question_image_url: `${BASE}/felix-2016-img-033.png`,
-    question_image_small: true,
+    question_image_strip: true,
     options: [
       { id: "A", text_en: "A", text_fa: "الف", image_url: `${BASE}/felix-2016-img-017.png` },
       { id: "B", text_en: "B", text_fa: "ب", image_url: `${BASE}/felix-2016-img-018.png` },
