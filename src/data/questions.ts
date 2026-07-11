@@ -708,6 +708,7 @@ export const questions: Question[] = [
     text_en: "Ellen wants to decorate the butterfly using these 6 stickers. Which butterfly can she make?",
     text_fa: "الن می‌خواهد پروانه را با این ۶ برچسب تزئین کند. کدام پروانه می‌تواند بسازد؟",
     question_image_url: `${BASE}/felix-2017-img-013.png`,
+    question_extra_images: [`${BASE}/felix-2017-q46-stickers.png`],
     options: [
       { id: "A", text_en: "A", text_fa: "الف", image_url: `${BASE}/felix-2017-img-001.png` },
       { id: "B", text_en: "B", text_fa: "ب", image_url: `${BASE}/felix-2017-img-002.png` },
