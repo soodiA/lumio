@@ -56,7 +56,11 @@ function QuestionContent() {
 
   const currentQuestion = stageQuestions[qIndex];
 
-  const shuffledOptions = currentQuestion.options;
+  const shuffledOptions = useMemo(
+    () => shuffleArray(currentQuestion.options),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [qIndex, grade, stage]
+  );
 
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
