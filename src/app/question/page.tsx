@@ -228,7 +228,7 @@ function QuestionContent() {
             </button>
           </div>
 
-          {/* Question text */}
+          {/* Text block 1 */}
           <div>
             <p dir="ltr" className="text-base font-bold leading-relaxed text-left" style={{ color: "#1a1a1a" }}>
               {currentQuestion.text_en}
@@ -240,60 +240,73 @@ function QuestionContent() {
             )}
           </div>
 
-          {/* Question image */}
+          {/* Image 1 */}
           {currentQuestion.question_image_url && (
             currentQuestion.question_image_small ? (
               <div className="flex justify-center">
-                <Image
-                  src={currentQuestion.question_image_url}
-                  alt="question image"
-                  width={150}
-                  height={150}
-                  className="object-contain"
-                  style={{ maxWidth: 150, maxHeight: 150 }}
-                  unoptimized
-                />
+                <Image src={currentQuestion.question_image_url} alt="question image"
+                  width={150} height={150} className="object-contain"
+                  style={{ maxWidth: 150, maxHeight: 150 }} unoptimized />
               </div>
             ) : currentQuestion.question_image_strip ? (
               <div className="rounded-2xl border border-gray-100 overflow-x-auto">
-                <Image
-                  src={currentQuestion.question_image_url}
-                  alt="question image"
-                  width={900}
-                  height={120}
-                  className="h-auto object-contain"
-                  style={{ minWidth: 600, minHeight: 100 }}
-                  unoptimized
-                />
+                <Image src={currentQuestion.question_image_url} alt="question image"
+                  width={900} height={120} className="h-auto object-contain"
+                  style={{ minWidth: 600, minHeight: 100 }} unoptimized />
               </div>
             ) : (
               <div className="rounded-2xl overflow-hidden border border-gray-100">
-                <Image
-                  src={currentQuestion.question_image_url}
-                  alt="question image"
-                  width={480}
-                  height={200}
-                  className="w-full h-auto object-contain"
-                  unoptimized
-                />
+                <Image src={currentQuestion.question_image_url} alt="question image"
+                  width={480} height={200} className="w-full h-auto object-contain" unoptimized />
               </div>
             )
           )}
 
-          {/* Extra question images */}
-          {currentQuestion.question_extra_images?.map((url, i) => (
-            <div key={i} className="flex justify-center">
-              <Image
-                src={url}
-                alt="question image"
-                width={150}
-                height={150}
-                className="object-contain max-w-full h-auto"
-                style={{ maxHeight: 150 }}
-                unoptimized
-              />
+          {/* Text block 2 */}
+          {currentQuestion.text_en_2 && (
+            <div>
+              <p dir="ltr" className="text-base font-bold leading-relaxed text-left" style={{ color: "#1a1a1a" }}>
+                {currentQuestion.text_en_2}
+              </p>
+              {showTranslation && currentQuestion.text_fa_2 && (
+                <p dir="rtl" className="mt-2 text-sm leading-relaxed text-right" style={{ color: "#6B7280" }}>
+                  {currentQuestion.text_fa_2}
+                </p>
+              )}
             </div>
-          ))}
+          )}
+
+          {/* Image 2 */}
+          {currentQuestion.question_extra_images?.[0] && (
+            <div className="flex justify-center">
+              <Image src={currentQuestion.question_extra_images[0]} alt="question image"
+                width={150} height={150} className="object-contain max-w-full h-auto"
+                style={{ maxHeight: 150 }} unoptimized />
+            </div>
+          )}
+
+          {/* Text block 3 */}
+          {currentQuestion.text_en_3 && (
+            <div>
+              <p dir="ltr" className="text-base font-bold leading-relaxed text-left" style={{ color: "#1a1a1a" }}>
+                {currentQuestion.text_en_3}
+              </p>
+              {showTranslation && currentQuestion.text_fa_3 && (
+                <p dir="rtl" className="mt-2 text-sm leading-relaxed text-right" style={{ color: "#6B7280" }}>
+                  {currentQuestion.text_fa_3}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Image 3 */}
+          {currentQuestion.question_extra_images?.[1] && (
+            <div className="flex justify-center">
+              <Image src={currentQuestion.question_extra_images[1]} alt="question image"
+                width={150} height={150} className="object-contain max-w-full h-auto"
+                style={{ maxHeight: 150 }} unoptimized />
+            </div>
+          )}
 
           {/* Options */}
           <div className="flex flex-col gap-3">

@@ -15,6 +15,10 @@ export interface Question {
   question_image_small?: boolean;
   question_image_strip?: boolean;
   question_extra_images?: string[];
+  text_en_2?: string;
+  text_fa_2?: string;
+  text_en_3?: string;
+  text_fa_3?: string;
   options: QuestionOption[];
   correct: string;
   skills: string[];
