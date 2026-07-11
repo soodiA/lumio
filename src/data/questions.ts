@@ -874,8 +874,15 @@ export const questions: Question[] = [
   },
   {
     id: 57, stage: 4, level: "5pt", year: 2017, grade_group: "1-2",
-    text_en: "Lisa has sheets of construction paper and wants to make 7 identical crowns. What is the minimum number of sheets she has to cut up?",
-    text_fa: "لیزا تعدادی کاغذ رنگی دارد و می‌خواهد ۷ تاج یکسان بسازد. حداقل چند ورق باید ببرد؟",
+    text_en: "Lisa has several sheets of construction paper like this",
+    text_fa: "لیزا چندین ورق کاغذ رنگی مثل این دارد",
+    question_image_url: `${BASE}/felix-2017-q57-sheet.png`,
+    question_image_small: true,
+    text_en_2: "and",
+    text_fa_2: "و",
+    question_extra_images: [`${BASE}/felix-2017-q57-pieces.png`, `${BASE}/felix-2017-q57-crown.png`],
+    text_en_3: "She wants to make 7 identical crowns. For that she cuts out the necessary parts. What is the minimum number of sheets of construction paper that she has to cut up?",
+    text_fa_3: "او می‌خواهد ۷ تاج یکسان بسازد. برای این کار قطعات لازم را برش می‌دهد. حداقل چند ورق کاغذ باید ببرد؟",
     options: [
       { id: "A", text_en: "7", text_fa: "۷" },
       { id: "B", text_en: "9", text_fa: "۹" },
