@@ -56,7 +56,18 @@ function QuestionContent() {
 
   const currentQuestion = stageQuestions[qIndex];
 
-  const shuffledOptions = currentQuestion.options;
+  // Shuffle option content into random A-E positions each attempt
+  const { shuffledOptions, effectiveCorrect } = useMemo(() => {
+    const LETTERS = ["A", "B", "C", "D", "E"];
+    const copy = currentQuestion.options.map((o) => ({ ...o, _origId: o.id }));
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    const mapped = copy.map((o, idx) => ({ ...o, id: LETTERS[idx] }));
+    const eff = mapped.find((o) => o._origId === currentQuestion.correct)?.id ?? currentQuestion.correct;
+    return { shuffledOptions: mapped, effectiveCorrect: eff };
+  }, [qIndex, grade, stage, currentQuestion]);
 
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -78,14 +89,14 @@ function QuestionContent() {
     setCoinDelta(null);
   }, [qIndex, grade, stage]);
 
-  const isCorrect = selected === currentQuestion.correct;
+  const isCorrect = selected === effectiveCorrect;
 
   const handleSubmit = () => {
     if (!selected) return;
     setSubmitted(true);
 
     let delta = 0;
-    if (selected === currentQuestion.correct) {
+    if (selected === effectiveCorrect) {
       delta = coinsPerCorrect;
     }
     const newCoins = Math.max(0, coins + delta);
@@ -274,7 +285,7 @@ function QuestionContent() {
               let textColor = "#1a1a1a";
 
               if (submitted) {
-                if (opt.id === currentQuestion.correct) {
+                if (opt.id === effectiveCorrect) {
                   borderColor = "#66BB6A"; bg = "#F0FDF4"; textColor = "#166534";
                 } else if (opt.id === selected && !isCorrect) {
                   borderColor = "#EF5350"; bg = "#FFF5F5"; textColor = "#991B1B";
@@ -297,13 +308,13 @@ function QuestionContent() {
                   }}
                 >
                   {opt.image_url && (
-                    <div className="w-full flex justify-center rounded-xl overflow-hidden">
+                    <div className="w-full flex justify-center">
                       <Image
                         src={opt.image_url}
                         alt={opt.text_en}
                         width={200}
-                        height={100}
-                        className="h-auto object-contain"
+                        height={160}
+                        className="object-contain max-w-full h-auto"
                         style={{ maxHeight: 160 }}
                         unoptimized
                       />
@@ -318,7 +329,7 @@ function QuestionContent() {
                         color: selected === opt.id && !submitted ? "white" : textColor,
                       }}
                     >
-                      {submitted && opt.id === currentQuestion.correct
+                      {submitted && opt.id === effectiveCorrect
                         ? "✓"
                         : submitted && opt.id === selected && !isCorrect
                         ? "✕"
