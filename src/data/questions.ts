@@ -14,6 +14,7 @@ export interface Question {
   question_image_url?: string;
   question_image_small?: boolean;
   question_image_strip?: boolean;
+  question_extra_images?: string[];
   options: QuestionOption[];
   correct: string;
   skills: string[];
@@ -689,6 +690,7 @@ export const questions: Question[] = [
     text_en: "In the picture we see a cube in two different positions. Which side is opposite to the side shown?",
     text_fa: "در تصویر یک مکعب را در دو موقعیت مختلف می‌بینیم. کدام وجه روبروی وجه نشان داده شده است؟",
     question_image_url: `${BASE}/felix-2016-q45-cubes.png`,
+    question_extra_images: [`${BASE}/felix-2016-q45-shown-face.png`],
     options: [
       { id: "A", text_en: "A", text_fa: "الف", image_url: `${BASE}/felix-2016-q45-opt-A.png` },
       { id: "B", text_en: "B", text_fa: "ب", image_url: `${BASE}/felix-2016-q45-opt-B.png` },

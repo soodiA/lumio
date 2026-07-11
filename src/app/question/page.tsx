@@ -277,6 +277,21 @@ function QuestionContent() {
             )
           )}
 
+          {/* Extra question images */}
+          {currentQuestion.question_extra_images?.map((url, i) => (
+            <div key={i} className="flex justify-center">
+              <Image
+                src={url}
+                alt="question image"
+                width={150}
+                height={150}
+                className="object-contain max-w-full h-auto"
+                style={{ maxHeight: 150 }}
+                unoptimized
+              />
+            </div>
+          ))}
+
           {/* Options */}
           <div className="flex flex-col gap-3">
             {shuffledOptions.map((opt) => {
