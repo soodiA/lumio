@@ -716,7 +716,7 @@ export const questions: Question[] = [
       { id: "D", text_en: "D", text_fa: "د", image_url: `${BASE}/felix-2017-img-004.png` },
       { id: "E", text_en: "E", text_fa: "ه", image_url: `${BASE}/felix-2017-img-000.png` },
     ],
-    correct: "A",
+    correct: "E",
     skills: ["pattern recognition", "spatial reasoning"],
   },
   {
