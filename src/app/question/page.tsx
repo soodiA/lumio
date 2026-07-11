@@ -59,13 +59,16 @@ function QuestionContent() {
   // Shuffle option content into random A-E positions each attempt
   const { shuffledOptions, effectiveCorrect } = useMemo(() => {
     const LETTERS = ["A", "B", "C", "D", "E"];
-    const copy = currentQuestion.options.map((o) => ({ ...o, _origId: o.id }));
+    const copy = [...currentQuestion.options];
     for (let i = copy.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [copy[i], copy[j]] = [copy[j], copy[i]];
     }
     const mapped = copy.map((o, idx) => ({ ...o, id: LETTERS[idx] }));
-    const eff = mapped.find((o) => o._origId === currentQuestion.correct)?.id ?? currentQuestion.correct;
+    const eff = mapped.find((o) => {
+      if (o.image_url) return o.image_url.endsWith(`/${currentQuestion.correct}`);
+      return o.text_en === currentQuestion.correct;
+    })?.id ?? mapped[0].id;
     return { shuffledOptions: mapped, effectiveCorrect: eff };
   }, [qIndex, grade, stage, currentQuestion]);
 
