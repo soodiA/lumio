@@ -304,7 +304,7 @@ function QuestionContent() {
                         width={200}
                         height={100}
                         className="h-auto object-contain"
-                        style={{ maxHeight: 90 }}
+                        style={{ maxHeight: 160 }}
                         unoptimized
                       />
                     </div>
