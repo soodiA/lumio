@@ -1984,13 +1984,13 @@ export const questions: Question[] = [
     text_fa: "مارا مربع را با استفاده از ۴ تا از ۵ شکل زیر ساخت. کدام شکل استفاده نشد؟",
     question_image_url: `${BASE}/felix-2021-img-049.png`,
     options: [
-      { id: "A", text_en: "A", text_fa: "الف", image_url: `${BASE}/felix-2021-img-050.png` },
-      { id: "B", text_en: "B", text_fa: "ب", image_url: `${BASE}/felix-2021-img-051.png` },
-      { id: "C", text_en: "C", text_fa: "ج", image_url: `${BASE}/felix-2021-img-052.png` },
-      { id: "D", text_en: "D", text_fa: "د", image_url: `${BASE}/felix-2021-img-053.png` },
-      { id: "E", text_en: "E", text_fa: "ه", image_url: `${BASE}/felix-2021-img-054.png` },
+      { id: "A", text_en: "A", text_fa: "الف", image_url: `${BASE}/felix-2021-img-035.png` },
+      { id: "B", text_en: "B", text_fa: "ب", image_url: `${BASE}/felix-2021-img-036.png` },
+      { id: "C", text_en: "C", text_fa: "ج", image_url: `${BASE}/felix-2021-img-037.png` },
+      { id: "D", text_en: "D", text_fa: "د", image_url: `${BASE}/felix-2021-img-038.png` },
+      { id: "E", text_en: "E", text_fa: "ه", image_url: `${BASE}/felix-2021-img-039.png` },
     ],
-    correct: "felix-2021-img-053.png",
+    correct: "felix-2021-img-038.png",
     skills: ["spatial reasoning", "geometry"],
   },
   {
@@ -2027,6 +2027,7 @@ export const questions: Question[] = [
     id: 134, stage: 8, level: "5pt", year: 2021, grade_group: "1-2",
     text_en: "The picture shows two cogs, each with a black tooth. Where will the black teeth be after the small cog has made one full turn?",
     text_fa: "تصویر دو چرخ‌دنده را نشان می‌دهد که هر کدام یک دندانه سیاه دارند. بعد از اینکه چرخ‌دنده کوچک یک دور کامل چرخید دندانه‌های سیاه کجا خواهند بود؟",
+    question_image_url: `${BASE}/felix-2021-img-062.png`,
     options: [
       { id: "A", text_en: "A", text_fa: "الف", image_url: `${BASE}/felix-2021-img-056.png` },
       { id: "B", text_en: "B", text_fa: "ب", image_url: `${BASE}/felix-2021-img-057.png` },
@@ -2092,7 +2093,7 @@ export const questions: Question[] = [
       { id: "D", text_en: "4", text_fa: "۴" },
       { id: "E", text_en: "5", text_fa: "۵" },
     ],
-    correct: "1",
+    correct: "3",
     skills: ["logic", "ordering"],
   },
 ];

@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 
 const STAGE_COUNT = 8; // stages 1-8 (years 2014-2021)
-const TOTAL_QUESTIONS = 10;
+const STAGE_TOTALS: Record<number, number> = { 7: 24, 8: 24 }; // default 15
+function stageTotal(id: number) { return STAGE_TOTALS[id] ?? 15; }
 const STAGE_COLORS = ["#42A5F5", "#66BB6A", "#FFA726", "#AB47BC", "#EF5350", "#26C6DA"];
 const STAGE_EMOJIS = ["⭐", "🌟", "🔥", "💎", "🚀", "🏆"];
 
@@ -72,7 +73,7 @@ function StagesContent() {
           />
 
           {stages.map((stage) => {
-            const pct = Math.round((stage.score / TOTAL_QUESTIONS) * 100);
+            const pct = Math.round((stage.score / stageTotal(stage.id)) * 100);
             return (
               <div key={stage.id} className="flex items-center gap-4 relative" style={{ zIndex: 1 }}>
                 {/* Circle */}

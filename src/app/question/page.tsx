@@ -135,7 +135,7 @@ function QuestionContent() {
     if (nextQ >= totalQuestions) {
       const wrongCount = parseInt(safeSession.get(key) ?? "0", 10);
       safeSession.remove(key);
-      router.push(`/result?grade=${grade}&stage=${stage}&wrong=${wrongCount}`);
+      router.push(`/result?grade=${grade}&stage=${stage}&wrong=${wrongCount}&total=${totalQuestions}`);
     } else {
       router.push(`/question?grade=${grade}&stage=${stage}&q=${nextQ}`);
     }

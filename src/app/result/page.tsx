@@ -5,14 +5,14 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 const MAX_WRONG_TO_PASS = 3;
-const TOTAL_QUESTIONS = 10;
 
 function ResultContent() {
   const params = useSearchParams();
   const grade = params.get("grade") ?? "1-2";
   const stage = parseInt(params.get("stage") ?? "1", 10);
   const wrongCount = parseInt(params.get("wrong") ?? "0", 10);
-  const correctCount = TOTAL_QUESTIONS - wrongCount;
+  const totalQuestions = parseInt(params.get("total") ?? (stage >= 7 ? "24" : "15"), 10);
+  const correctCount = totalQuestions - wrongCount;
   const passed = wrongCount <= MAX_WRONG_TO_PASS;
 
   const [totalCoins, setTotalCoins] = useState(0);
@@ -40,7 +40,7 @@ function ResultContent() {
     }
   }, [grade, stage, passed, correctCount]);
 
-  const stars = wrongCount === 0 ? 3 : wrongCount <= 1 ? 2 : passed ? 1 : 0;
+  const stars = wrongCount === 0 ? 3 : wrongCount === 1 ? 2 : wrongCount === 2 ? 1 : 0;
 
   const gradeLabel: Record<string, string> = {
     "1-2": "پایه ۱ و ۲",
@@ -89,7 +89,7 @@ function ResultContent() {
                 {correctCount}
               </span>
               <span className="text-2xl font-medium mb-1" style={{ color: "#9CA3AF" }}>
-                از {TOTAL_QUESTIONS}
+                از {totalQuestions}
               </span>
             </div>
             <div
@@ -99,7 +99,7 @@ function ResultContent() {
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{
-                  width: `${(correctCount / TOTAL_QUESTIONS) * 100}%`,
+                  width: `${(correctCount / totalQuestions) * 100}%`,
                   background: passed ? "#43A047" : "#EF5350",
                 }}
               />
