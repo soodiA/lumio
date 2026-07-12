@@ -7,8 +7,8 @@ import { Suspense, useEffect, useState } from "react";
 const STAGE_COUNT = 8; // stages 1-8 (years 2014-2021)
 const STAGE_TOTALS: Record<number, number> = { 7: 24, 8: 24 }; // default 15
 function stageTotal(id: number) { return STAGE_TOTALS[id] ?? 15; }
-const STAGE_COLORS = ["#42A5F5", "#66BB6A", "#FFA726", "#AB47BC", "#EF5350", "#26C6DA"];
-const STAGE_EMOJIS = ["⭐", "🌟", "🔥", "💎", "🚀", "🏆"];
+const STAGE_COLORS = ["#42A5F5", "#66BB6A", "#FFA726", "#AB47BC", "#EF5350", "#26C6DA", "#FF7043", "#8D6E63"];
+const STAGE_EMOJIS = ["⭐", "🌟", "🔥", "💎", "🚀", "🏆", "🦁", "👑"];
 
 function StagesContent() {
   const params = useSearchParams();
