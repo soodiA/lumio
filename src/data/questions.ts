@@ -1463,9 +1463,12 @@ export const questions: Question[] = [
   },
   {
     id: 96, stage: 7, level: "3pt", year: 2020, grade_group: "1-2",
-    text_en: "Ana has the cards shown on the left. She chooses several of them to assemble the tower shown on the right. Which cards did she not use?",
-    text_fa: "آنا کارت‌های نشان داده شده را دارد. او چند تا از آن‌ها را انتخاب کرد تا برج نشان داده شده را بسازد. کدام کارت‌ها را استفاده نکرد؟",
-    question_image_url: `${BASE}/felix-2020-img-031.png`,
+    text_en: "Ana has the cards shown:",
+    text_fa: "آنا این کارت‌ها را دارد:",
+    question_image_url: `${BASE}/felix-2020-img-030.png`,
+    text_en_2: "She chooses several of them to assemble the tower shown. Which cards did she not use?",
+    text_fa_2: "او چند تا از آن‌ها را انتخاب کرد تا برج نشان داده شده را بسازد. کدام کارت‌ها را استفاده نکرد؟",
+    question_extra_images: [`${BASE}/felix-2020-img-031.png`],
     options: [
       { id: "A", text_en: "A", text_fa: "الف", image_url: `${BASE}/felix-2020-img-023.png` },
       { id: "B", text_en: "B", text_fa: "ب", image_url: `${BASE}/felix-2020-img-024.png` },
