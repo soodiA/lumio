@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
 
 const gradeGroups = [
   { id: "1-2", label: "پایه اول و دوم", emoji: "🐣", color: "#42A5F5" },
@@ -10,6 +13,8 @@ const gradeGroups = [
 ];
 
 export default function GradePage() {
+  const { user } = useAuth();
+
   return (
     <main
       className="flex flex-col flex-1 items-center min-h-screen px-6 py-10"
@@ -17,13 +22,36 @@ export default function GradePage() {
     >
       <div className="w-full max-w-sm">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold" style={{ color: "#1a1a1a" }}>
-            گروه پایه‌ات را انتخاب کن
-          </h1>
-          <p className="text-base mt-2" style={{ color: "#777" }}>
-            سوال‌های کانگورو بر اساس گروه‌های دو پایه‌ای طراحی شده‌اند
-          </p>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold" style={{ color: "#1a1a1a" }}>
+              گروه پایه‌ات را انتخاب کن
+            </h1>
+            <p className="text-sm mt-1" style={{ color: "#777" }}>
+              سوال‌های کانگورو بر اساس گروه‌های دو پایه‌ای
+            </p>
+          </div>
+          <Link href={user ? "/profile" : "/login"} className="w-10 h-10 rounded-full flex items-center justify-center text-xl" style={{ background: "#F3F4F6" }}>
+            👤
+          </Link>
+        </div>
+
+        {/* Quick nav */}
+        <div className="flex gap-3 mb-6">
+          <Link
+            href="/league"
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm"
+            style={{ background: "#FFF8E1", color: "#F59E0B" }}
+          >
+            🏆 لیگ
+          </Link>
+          <Link
+            href="/friends"
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm"
+            style={{ background: "#EFF6FF", color: "#42A5F5" }}
+          >
+            👥 دوستان
+          </Link>
         </div>
 
         {/* Grade group cards */}
