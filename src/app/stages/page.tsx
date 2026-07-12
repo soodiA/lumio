@@ -18,6 +18,11 @@ function StagesContent() {
 
   useEffect(() => {
     const unlockKey = `lumio_unlocked_${grade}`;
+    // dev param: ?unlock=all unlocks every stage
+    if (params.get("unlock") === "all") {
+      const all = Array.from({ length: STAGE_COUNT }, (_, i) => i + 1);
+      localStorage.setItem(unlockKey, JSON.stringify(all));
+    }
     const stored = JSON.parse(localStorage.getItem(unlockKey) ?? "[1]") as number[];
     setUnlockedStages(stored);
 
