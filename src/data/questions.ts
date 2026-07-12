@@ -1758,8 +1758,11 @@ export const questions: Question[] = [
   // Stage 8 — 2021 (KSF PreEcolier / Canguru de Matemática Brasil, Level P)
   {
     id: 115, stage: 8, level: "3pt", year: 2021, grade_group: "1-2",
-    text_en: "A kangaroo laid out 3 sticks to make a shape. It is not allowed to break or to bend the sticks. Which shape could the kangaroo make?",
-    text_fa: "یک کانگورو ۳ چوب را برای ساختن یک شکل گذاشت. شکستن یا خم کردن چوب‌ها مجاز نیست. کانگورو می‌تواند کدام شکل را بسازد؟",
+    text_en: "A kangaroo laid out 3 sticks like this",
+    text_fa: "یک کانگورو ۳ چوب را اینطور گذاشت",
+    question_image_url: `${BASE}/felix-2021-img-sticks.png`,
+    text_en_2: "to make a shape. It is not allowed to break or to bend the sticks. Which shape could the kangaroo make?",
+    text_fa_2: "تا یک شکل بسازد. شکستن یا خم کردن چوب‌ها مجاز نیست. کانگورو می‌تواند کدام شکل را بسازد؟",
     options: [
       { id: "A", text_en: "A", text_fa: "الف", image_url: `${BASE}/felix-2021-img-001.png` },
       { id: "B", text_en: "B", text_fa: "ب", image_url: `${BASE}/felix-2021-img-002.png` },
@@ -1767,7 +1770,7 @@ export const questions: Question[] = [
       { id: "D", text_en: "D", text_fa: "د", image_url: `${BASE}/felix-2021-img-004.png` },
       { id: "E", text_en: "E", text_fa: "ه", image_url: `${BASE}/felix-2021-img-015.png` },
     ],
-    correct: "felix-2021-img-015.png",
+    correct: "felix-2021-img-004.png",
     skills: ["spatial reasoning", "geometry"],
   },
   {
@@ -1869,7 +1872,7 @@ export const questions: Question[] = [
       { id: "D", text_en: "D", text_fa: "د", image_url: `${BASE}/felix-2021-img-022.png` },
       { id: "E", text_en: "E", text_fa: "ه", image_url: `${BASE}/felix-2021-img-023.png` },
     ],
-    correct: "felix-2021-img-020.png",
+    correct: "felix-2021-img-021.png",
     skills: ["arithmetic", "number sense"],
   },
   {
@@ -1966,14 +1969,16 @@ export const questions: Question[] = [
     text_en: "The picture shows the five houses of five friends and their school. The school is the largest building. To go to school, Doris and Ali walk past Leo's house. Eva walks past Chloe's house. Which is Eva's house?",
     text_fa: "تصویر خانه‌های پنج دوست و مدرسه‌شان را نشان می‌دهد. مدرسه بزرگ‌ترین ساختمان است. دوریس و علی برای رفتن به مدرسه از خانه لئو رد می‌شوند. اوا از خانه کلوئی رد می‌شود. خانه اوا کدام است؟",
     question_image_url: `${BASE}/felix-2021-img-048.png`,
+    question_extra_images: [`${BASE}/felix-2021-img-houses-strip.jpg`],
+    question_extra_images_full: true,
     options: [
-      { id: "A", text_en: "A", text_fa: "الف", image_url: `${BASE}/felix-2021-img-030.png` },
-      { id: "B", text_en: "B", text_fa: "ب", image_url: `${BASE}/felix-2021-img-031.png` },
-      { id: "C", text_en: "C", text_fa: "ج", image_url: `${BASE}/felix-2021-img-032.png` },
-      { id: "D", text_en: "D", text_fa: "د", image_url: `${BASE}/felix-2021-img-033.png` },
-      { id: "E", text_en: "E", text_fa: "ه", image_url: `${BASE}/felix-2021-img-034.png` },
+      { id: "A", text_en: "A", text_fa: "A" },
+      { id: "B", text_en: "B", text_fa: "B" },
+      { id: "C", text_en: "C", text_fa: "C" },
+      { id: "D", text_en: "D", text_fa: "D" },
+      { id: "E", text_en: "E", text_fa: "E" },
     ],
-    correct: "felix-2021-img-031.png",
+    correct: "B",
     skills: ["logic", "spatial reasoning"],
   },
   {
