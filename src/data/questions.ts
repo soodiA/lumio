@@ -2065,9 +2065,12 @@ export const questions: Question[] = [
   },
   {
     id: 136, stage: 8, level: "5pt", year: 2021, grade_group: "1-2",
-    text_en: "Each participant in a cooking contest baked one tray of cookies like the one shown. What is the smallest number of trays of cookies needed to make the following plate?",
-    text_fa: "هر شرکت‌کننده در مسابقه آشپزی یک سینی کوکی مثل تصویر پخت. حداقل چند سینی کوکی لازم است تا بشقاب زیر درست شود؟",
+    text_en: "Each participant in a cooking contest baked one tray of cookies like the one shown:",
+    text_fa: "هر شرکت‌کننده در مسابقه آشپزی یک سینی کوکی مثل تصویر پخت:",
     question_image_url: `${BASE}/felix-2021-img-063.png`,
+    text_en_2: "What is the smallest number of trays of cookies needed to make the following plate?",
+    text_fa_2: "حداقل چند سینی کوکی لازم است تا بشقاب زیر درست شود؟",
+    question_extra_images: [`${BASE}/felix-2021-img-064.png`],
     options: [
       { id: "A", text_en: "1", text_fa: "۱" },
       { id: "B", text_en: "2", text_fa: "۲" },
