@@ -21,6 +21,9 @@ jobs:
       - run: npm ci
 
       - run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://icbvwyphyvhdccajaany.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljYnZ3eXBoeXZoZGNjYWphYW55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NjA5ODgsImV4cCI6MjA5OTQzNjk4OH0.QmkWepU5ZzD6v1tOs7-6Ra5hrj-zRJ-WPeENXGEB79k
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
