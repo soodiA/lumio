@@ -1413,7 +1413,7 @@ export const questions: Question[] = [
       { id: "D", text_en: "D", text_fa: "د", image_url: `${BASE}/felix-2020-img-001.png` },
       { id: "E", text_en: "E", text_fa: "ه", image_url: `${BASE}/felix-2020-img-003.png` },
     ],
-    correct: "felix-2020-img-002.png",
+    correct: "felix-2020-img-004.png",
     skills: ["spatial reasoning", "logic"],
   },
   {
