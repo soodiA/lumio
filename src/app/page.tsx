@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
 
 export default function SplashPage() {
+  const { user } = useAuth();
   return (
     <main
       className="flex flex-col flex-1 items-center justify-center min-h-screen px-6"
@@ -39,6 +43,26 @@ export default function SplashPage() {
         >
           شروع
         </Link>
+
+        {/* Auth button */}
+        {user ? (
+          <Link
+            href="/profile"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-full font-medium text-base transition-all duration-200 hover:opacity-90"
+            style={{ background: "#EFF6FF", color: "#42A5F5" }}
+          >
+            <span>👤</span>
+            <span>{user.user_metadata?.display_name ?? user.email}</span>
+          </Link>
+        ) : (
+          <Link
+            href="/login"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-full font-medium text-base transition-all duration-200 hover:opacity-90"
+            style={{ background: "#F3F4F6", color: "#555" }}
+          >
+            ورود / ثبت‌نام
+          </Link>
+        )}
       </div>
 
       {/* Decorative dots */}
