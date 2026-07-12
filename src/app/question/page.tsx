@@ -330,7 +330,7 @@ function QuestionContent() {
                   key={opt.id}
                   onClick={() => !submitted && setSelected(opt.id)}
                   disabled={submitted}
-                  className="w-full flex flex-col gap-2 p-3 rounded-2xl transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                  className="w-full flex items-center gap-3 p-3 rounded-2xl transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
                   style={{
                     border: `2px solid ${borderColor}`,
                     background: bg,
@@ -338,45 +338,45 @@ function QuestionContent() {
                     cursor: submitted ? "default" : "pointer",
                   }}
                 >
-                  {opt.image_url && (
-                    <div className="w-full flex justify-center">
+                  {/* Letter badge — always on the left */}
+                  <span
+                    className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold"
+                    style={{
+                      border: `2px solid ${borderColor}`,
+                      background: selected === opt.id && !submitted ? "#42A5F5" : bg,
+                      color: selected === opt.id && !submitted ? "white" : textColor,
+                    }}
+                  >
+                    {submitted && opt.id === effectiveCorrect
+                      ? "✓"
+                      : submitted && opt.id === selected && !isCorrect
+                      ? "✕"
+                      : opt.id}
+                  </span>
+
+                  {/* Content: image or text */}
+                  {opt.image_url ? (
+                    <div className="flex-1 flex justify-center">
                       <Image
                         src={opt.image_url}
                         alt={opt.text_en}
                         width={200}
-                        height={160}
+                        height={120}
                         className="object-contain max-w-full h-auto"
-                        style={{ maxHeight: 160 }}
+                        style={{ maxHeight: 120 }}
                         unoptimized
                       />
                     </div>
-                  )}
-                  <div className="flex items-center gap-3">
-                    <span
-                      className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                      style={{
-                        border: `2px solid ${borderColor}`,
-                        background: selected === opt.id && !submitted ? "#42A5F5" : bg,
-                        color: selected === opt.id && !submitted ? "white" : textColor,
-                      }}
-                    >
-                      {submitted && opt.id === effectiveCorrect
-                        ? "✓"
-                        : submitted && opt.id === selected && !isCorrect
-                        ? "✕"
-                        : opt.id}
-                    </span>
+                  ) : (
                     <span className="flex flex-col gap-0.5 flex-1">
-                      {!opt.image_url && (
-                        <span dir="ltr" className="text-base font-semibold text-left block">{opt.text_en}</span>
-                      )}
-                      {showTranslation && !opt.image_url && (
+                      <span dir="ltr" className="text-base font-semibold text-left block">{opt.text_en}</span>
+                      {showTranslation && (
                         <span dir="rtl" className="text-xs text-right block" style={{ color: "#6B7280" }}>
                           {opt.text_fa}
                         </span>
                       )}
                     </span>
-                  </div>
+                  )}
                 </button>
               );
             })}

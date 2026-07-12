@@ -1413,7 +1413,7 @@ export const questions: Question[] = [
       { id: "D", text_en: "D", text_fa: "د", image_url: `${BASE}/felix-2020-img-001.png` },
       { id: "E", text_en: "E", text_fa: "ه", image_url: `${BASE}/felix-2020-img-003.png` },
     ],
-    correct: "felix-2020-img-004.png",
+    correct: "felix-2020-img-002.png",
     skills: ["spatial reasoning", "logic"],
   },
   {
@@ -1495,7 +1495,6 @@ export const questions: Question[] = [
     id: 98, stage: 7, level: "3pt", year: 2020, grade_group: "1-2",
     text_en: "Ana draws some shapes on a sheet. Her drawing has fewer squares than triangles. What could be her drawing?",
     text_fa: "آنا چند شکل روی یک کاغذ می‌کشد. در نقاشی او مربع‌ها کمتر از مثلث‌ها هستند. کدام می‌تواند نقاشی او باشد؟",
-    question_image_url: `${BASE}/felix-2020-img-030.png`,
     options: [
       { id: "A", text_en: "A", text_fa: "الف", image_url: `${BASE}/felix-2020-img-018.png` },
       { id: "B", text_en: "B", text_fa: "ب", image_url: `${BASE}/felix-2020-img-019.png` },
@@ -1503,7 +1502,7 @@ export const questions: Question[] = [
       { id: "D", text_en: "D", text_fa: "د", image_url: `${BASE}/felix-2020-img-021.png` },
       { id: "E", text_en: "E", text_fa: "ه", image_url: `${BASE}/felix-2020-img-022.png` },
     ],
-    correct: "felix-2020-img-021.png",
+    correct: "felix-2020-img-019.png",
     skills: ["counting", "logic"],
   },
   {
