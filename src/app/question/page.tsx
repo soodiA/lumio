@@ -278,11 +278,18 @@ function QuestionContent() {
 
           {/* Image 2 */}
           {currentQuestion.question_extra_images?.[0] && (
-            <div className="flex justify-center">
-              <Image src={currentQuestion.question_extra_images[0]} alt="question image"
-                width={150} height={150} className="object-contain max-w-full h-auto"
-                style={{ maxHeight: 150 }} unoptimized />
-            </div>
+            currentQuestion.question_extra_images_full ? (
+              <div className="rounded-2xl overflow-hidden border border-gray-100">
+                <Image src={currentQuestion.question_extra_images[0]} alt="question image"
+                  width={480} height={200} className="w-full h-auto object-contain" unoptimized />
+              </div>
+            ) : (
+              <div className="flex justify-center">
+                <Image src={currentQuestion.question_extra_images[0]} alt="question image"
+                  width={150} height={150} className="object-contain max-w-full h-auto"
+                  style={{ maxHeight: 150 }} unoptimized />
+              </div>
+            )
           )}
 
           {/* Text block 3 */}

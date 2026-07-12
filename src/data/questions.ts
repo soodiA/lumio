@@ -15,6 +15,7 @@ export interface Question {
   question_image_small?: boolean;
   question_image_strip?: boolean;
   question_extra_images?: string[];
+  question_extra_images_full?: boolean;
   text_en_2?: string;
   text_fa_2?: string;
   text_en_3?: string;
@@ -2071,6 +2072,7 @@ export const questions: Question[] = [
     text_en_2: "What is the smallest number of trays of cookies needed to make the following plate?",
     text_fa_2: "حداقل چند سینی کوکی لازم است تا بشقاب زیر درست شود؟",
     question_extra_images: [`${BASE}/felix-2021-img-064.png`],
+    question_extra_images_full: true,
     options: [
       { id: "A", text_en: "1", text_fa: "۱" },
       { id: "B", text_en: "2", text_fa: "۲" },
