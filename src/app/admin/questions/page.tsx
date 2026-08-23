@@ -70,7 +70,7 @@ export default function QuestionsPage() {
                   <td style={td}>{q.year ?? "—"}</td>
                   <td style={{ ...td, maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{q.text_fa}</td>
                   <td style={td}>
-                    <Link href={`/lumio/admin/questions/${q.id}/edit`} style={{ color: "#6366f1", marginLeft: 12, fontSize: 13 }}>ویرایش</Link>
+                    <Link href={`/lumio/admin/questions/edit?id=${q.id}`} style={{ color: "#6366f1", marginLeft: 12, fontSize: 13 }}>ویرایش</Link>
                     <button onClick={() => handleDelete(q.id)} disabled={deleting === q.id}
                       style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontSize: 13 }}>
                       {deleting === q.id ? "…" : "حذف"}
