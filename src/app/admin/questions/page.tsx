@@ -42,7 +42,7 @@ export default function QuestionsPage() {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <h1 style={{ fontSize: 22, fontWeight: 700 }}>سوال‌ها</h1>
-        <Link href="/lumio/admin/questions/new" style={{ background: "#6366f1", color: "#fff", padding: "8px 18px", borderRadius: 8, textDecoration: "none", fontSize: 14 }}>
+        <Link href="/admin/questions/new" style={{ background: "#6366f1", color: "#fff", padding: "8px 18px", borderRadius: 8, textDecoration: "none", fontSize: 14 }}>
           + افزودن سوال جدید
         </Link>
       </div>
@@ -70,7 +70,7 @@ export default function QuestionsPage() {
                   <td style={td}>{q.year ?? "—"}</td>
                   <td style={{ ...td, maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{q.text_fa}</td>
                   <td style={td}>
-                    <Link href={`/lumio/admin/questions/edit?id=${q.id}`} style={{ color: "#6366f1", marginLeft: 12, fontSize: 13 }}>ویرایش</Link>
+                    <Link href={`/admin/questions/edit?id=${q.id}`} style={{ color: "#6366f1", marginLeft: 12, fontSize: 13 }}>ویرایش</Link>
                     <button onClick={() => handleDelete(q.id)} disabled={deleting === q.id}
                       style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontSize: 13 }}>
                       {deleting === q.id ? "…" : "حذف"}

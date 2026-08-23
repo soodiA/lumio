@@ -135,7 +135,7 @@ export default function QuestionForm({ initial }: { initial?: QuestionDraft }) {
       if (oe) { setError(oe.message); setSaving(false); return; }
     }
 
-    router.push("/lumio/admin/questions");
+    router.push("/admin/questions");
   }
 
   return (
@@ -236,7 +236,7 @@ export default function QuestionForm({ initial }: { initial?: QuestionDraft }) {
           style={{ background: "#6366f1", color: "#fff", padding: "10px 28px", borderRadius: 8, border: "none", cursor: saving ? "not-allowed" : "pointer", fontSize: 15, opacity: saving ? 0.7 : 1 }}>
           {saving ? "در حال ذخیره…" : "ذخیره"}
         </button>
-        <button onClick={() => router.push("/lumio/admin/questions")}
+        <button onClick={() => router.push("/admin/questions")}
           style={{ background: "#334155", color: "#f1f5f9", padding: "10px 20px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 15 }}>
           انصراف
         </button>
