@@ -1,24 +1,36 @@
-import { notFound } from "next/navigation";
-import { supabaseAdmin } from "@/lib/supabase-admin";
-import EditForm from "./_EditForm";
+"use client";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
+import QuestionForm, { initDraftFromRow, QuestionDraft } from "../../_components/QuestionForm";
 
-export const dynamic = "force-dynamic";
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
-export default async function EditQuestionPage({ params }: { params: { id: string } }) {
-  const id = Number(params.id);
-  if (isNaN(id)) notFound();
+export default function EditQuestionPage() {
+  const { id } = useParams<{ id: string }>();
+  const [draft, setDraft] = useState<QuestionDraft | null>(null);
+  const [notFound, setNotFound] = useState(false);
 
-  const [{ data: question, error: qErr }, { data: options, error: oErr }] = await Promise.all([
-    supabaseAdmin.from("questions").select("*").eq("id", id).single(),
-    supabaseAdmin.from("question_options").select("*").eq("question_id", id).order("sort_order"),
-  ]);
+  useEffect(() => {
+    async function load() {
+      const { data: row } = await supabase.from("questions").select("*").eq("id", id).single();
+      if (!row) { setNotFound(true); return; }
+      const { data: opts } = await supabase.from("question_options").select("*").eq("question_id", id).order("sort_order");
+      setDraft(initDraftFromRow(row as Record<string, unknown>, (opts ?? []) as Record<string, string>[]));
+    }
+    load();
+  }, [id]);
 
-  if (qErr || !question) notFound();
+  if (notFound) return <p style={{ color: "#ef4444" }}>سوال پیدا نشد.</p>;
+  if (!draft) return <p style={{ color: "#94a3b8" }}>در حال بارگذاری…</p>;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">ویرایش سوال #{id}</h1>
-      <EditForm question={question as any} options={(options ?? []) as any} questionId={id} />
+      <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 20 }}>ویرایش سوال #{id}</h1>
+      <QuestionForm initial={draft} />
     </div>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth-context";
 
 const STAGE_COUNT = 8; // stages 1-8 (years 2014-2021)
 const STAGE_TOTALS: Record<number, number> = { 7: 24, 8: 24 }; // default 15
@@ -12,9 +13,15 @@ const STAGE_EMOJIS = ["⭐", "🌟", "🔥", "💎", "🚀", "🏆", "🦁", "�
 
 function StagesContent() {
   const params = useSearchParams();
+  const router = useRouter();
+  const { user, loading } = useAuth();
   const grade = params.get("grade") ?? "1-2";
   const [unlockedStages, setUnlockedStages] = useState<number[]>([1]);
   const [scores, setScores] = useState<Record<number, number>>({});
+
+  useEffect(() => {
+    if (!loading && !user) router.push("/login");
+  }, [user, loading, router]);
 
   useEffect(() => {
     const unlockKey = `lumio_unlocked_${grade}`;

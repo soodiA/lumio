@@ -1,106 +1,87 @@
+"use client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabaseAdmin } from "@/lib/supabase-admin";
-import { deleteQuestion } from "./_actions";
+import { createClient } from "@supabase/supabase-js";
 
-export const dynamic = "force-dynamic";
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
-export default async function QuestionsListPage() {
-  const { data: questions, error } = await supabaseAdmin
-    .from("questions")
-    .select("id, stage, level, text_fa, correct, created_at")
-    .order("id", { ascending: false });
+type Q = { id: number; stage: number; level: string; text_fa: string; grade_group: string | null; year: number | null };
+
+const th: React.CSSProperties = { padding: "10px 14px", textAlign: "right", borderBottom: "1px solid #334155", color: "#94a3b8", fontWeight: 600, fontSize: 13 };
+const td: React.CSSProperties = { padding: "10px 14px", borderBottom: "1px solid #1e293b", fontSize: 14 };
+
+export default function QuestionsPage() {
+  const [questions, setQuestions] = useState<Q[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState<number | null>(null);
+
+  async function load() {
+    setLoading(true);
+    const { data } = await supabase
+      .from("questions")
+      .select("id,stage,level,text_fa,grade_group,year")
+      .order("stage").order("id");
+    setQuestions(data ?? []);
+    setLoading(false);
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function handleDelete(id: number) {
+    if (!confirm("این سوال حذف شود؟")) return;
+    setDeleting(id);
+    await supabase.from("questions").delete().eq("id", id);
+    await load();
+    setDeleting(null);
+  }
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">لیست سوال‌ها</h1>
-        <Link
-          href="/admin/questions/new"
-          className="px-4 py-2 rounded text-white text-sm font-medium"
-          style={{ background: "var(--color-primary-btn)" }}
-        >
-          + سوال جدید
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700 }}>سوال‌ها</h1>
+        <Link href="/lumio/admin/questions/new" style={{ background: "#6366f1", color: "#fff", padding: "8px 18px", borderRadius: 8, textDecoration: "none", fontSize: 14 }}>
+          + افزودن سوال جدید
         </Link>
       </div>
 
-      {error && (
-        <div
-          className="p-4 rounded mb-4 text-sm"
-          style={{ background: "#fdecea", color: "var(--color-error)" }}
-        >
-          خطا در بارگذاری: {error.message}
-        </div>
-      )}
-
-      <div className="overflow-x-auto rounded border" style={{ borderColor: "#e0e0e0" }}>
-        <table className="w-full text-sm" style={{ borderCollapse: "collapse" }}>
-          <thead style={{ background: "#f5f5f5" }}>
-            <tr>
-              <th className="px-4 py-3 text-right font-medium">ID</th>
-              <th className="px-4 py-3 text-right font-medium">مرحله</th>
-              <th className="px-4 py-3 text-right font-medium">سطح</th>
-              <th className="px-4 py-3 text-right font-medium">متن سوال</th>
-              <th className="px-4 py-3 text-right font-medium">پاسخ صحیح</th>
-              <th className="px-4 py-3 text-right font-medium">عملیات</th>
-            </tr>
-          </thead>
-          <tbody>
-            {!questions || questions.length === 0 ? (
+      {loading ? (
+        <p style={{ color: "#94a3b8" }}>در حال بارگذاری…</p>
+      ) : questions.length === 0 ? (
+        <p style={{ color: "#94a3b8" }}>هنوز سوالی وارد نشده. اولین سوال را اضافه کنید!</p>
+      ) : (
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", background: "#1e293b", borderRadius: 10, overflow: "hidden" }}>
+            <thead>
               <tr>
-                <td
-                  colSpan={6}
-                  className="px-4 py-8 text-center"
-                  style={{ color: "#888" }}
-                >
-                  هیچ سوالی ثبت نشده است.
-                </td>
+                <th style={th}>#</th><th style={th}>مرحله</th><th style={th}>سطح</th>
+                <th style={th}>گروه پایه</th><th style={th}>سال</th><th style={th}>متن سوال</th><th style={th}>عملیات</th>
               </tr>
-            ) : (
-              questions.map((q, i) => (
-                <tr
-                  key={q.id}
-                  style={{
-                    borderTop: "1px solid #e0e0e0",
-                    background: i % 2 === 0 ? "#fff" : "#fafafa",
-                  }}
-                >
-                  <td className="px-4 py-3">{q.id}</td>
-                  <td className="px-4 py-3">{q.stage}</td>
-                  <td className="px-4 py-3">{q.level}</td>
-                  <td
-                    className="px-4 py-3 max-w-xs truncate"
-                    title={q.text_fa}
-                  >
-                    {q.text_fa}
-                  </td>
-                  <td className="px-4 py-3">{q.correct}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/admin/questions/${q.id}/edit`}
-                        className="px-3 py-1 rounded text-xs font-medium inline-block"
-                        style={{ background: "var(--color-stage)", color: "#fff" }}
-                      >
-                        ویرایش
-                      </Link>
-                      <form action={deleteQuestion}>
-                        <input type="hidden" name="id" value={q.id} />
-                        <button
-                          type="submit"
-                          className="px-3 py-1 rounded text-xs font-medium"
-                          style={{ background: "var(--color-error)", color: "#fff", cursor: "pointer" }}
-                        >
-                          حذف
-                        </button>
-                      </form>
-                    </div>
+            </thead>
+            <tbody>
+              {questions.map((q) => (
+                <tr key={q.id}>
+                  <td style={td}>{q.id}</td>
+                  <td style={td}>{q.stage}</td>
+                  <td style={td}>{q.level}</td>
+                  <td style={td}>{q.grade_group ?? "—"}</td>
+                  <td style={td}>{q.year ?? "—"}</td>
+                  <td style={{ ...td, maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{q.text_fa}</td>
+                  <td style={td}>
+                    <Link href={`/lumio/admin/questions/${q.id}/edit`} style={{ color: "#6366f1", marginLeft: 12, fontSize: 13 }}>ویرایش</Link>
+                    <button onClick={() => handleDelete(q.id)} disabled={deleting === q.id}
+                      style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontSize: 13 }}>
+                      {deleting === q.id ? "…" : "حذف"}
+                    </button>
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

@@ -37,7 +37,7 @@ export default function SplashPage() {
 
         {/* CTA */}
         <Link
-          href="/grade"
+          href={user ? "/grade" : "/login"}
           className="mt-2 w-full flex items-center justify-center text-white text-xl font-bold py-4 rounded-full transition-all duration-200 hover:scale-105 active:scale-95"
           style={{ background: "#43A047" }}
         >
@@ -56,11 +56,11 @@ export default function SplashPage() {
           </Link>
         ) : (
           <Link
-            href="/login"
+            href="/signup"
             className="w-full flex items-center justify-center gap-2 py-3 rounded-full font-medium text-base transition-all duration-200 hover:opacity-90"
             style={{ background: "#F3F4F6", color: "#555" }}
           >
-            ورود / ثبت‌نام
+            ثبت‌نام رایگان
           </Link>
         )}
       </div>

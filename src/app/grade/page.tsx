@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 
 const gradeGroups = [
@@ -13,7 +15,20 @@ const gradeGroups = [
 ];
 
 export default function GradePage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) router.push("/login");
+  }, [user, loading, router]);
+
+  if (loading || !user) {
+    return (
+      <main className="flex flex-col flex-1 items-center justify-center min-h-screen" style={{ background: "#FFFDF7" }}>
+        <div className="text-4xl">⏳</div>
+      </main>
+    );
+  }
 
   return (
     <main

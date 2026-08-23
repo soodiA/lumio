@@ -1,337 +1,246 @@
 "use client";
-
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { QuestionRow, QuestionOptionRow } from "@/lib/supabase-admin";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 const OPTION_KEYS = ["A", "B", "C", "D", "E"];
-const LEVEL_OPTIONS = ["3pt", "4pt", "5pt"] as const;
+const LEVELS = ["3pt", "4pt", "5pt"];
 
-type OptionDraft = {
-  option_key: string;
-  text_fa: string;
-  text_en: string;
-  image_url: string;
+type OptionDraft = { option_key: string; text_fa: string; text_en: string; image_url: string };
+
+export type QuestionDraft = {
+  id?: number;
+  stage: number; level: string; year: number | null; grade_group: string;
+  text_fa: string; text_en: string;
+  text_fa_2: string; text_en_2: string;
+  text_fa_3: string; text_en_3: string;
+  question_image_url: string;
+  question_image_small: boolean; question_image_strip: boolean;
+  question_extra_images: string;
+  question_extra_images_full: boolean;
+  hint_fa: string; hint_en: string;
+  correct: string; skills: string;
+  options: OptionDraft[];
 };
 
-type Props = {
-  question?: QuestionRow;
-  options?: QuestionOptionRow[];
-  action: (formData: FormData) => Promise<{ error?: string }>;
-};
-
-function initOptions(options?: QuestionOptionRow[]): OptionDraft[] {
-  return OPTION_KEYS.map((key) => {
-    const existing = options?.find((o) => o.option_key === key);
-    return {
-      option_key: key,
-      text_fa: existing?.text_fa ?? "",
-      text_en: existing?.text_en ?? "",
-      image_url: existing?.image_url ?? "",
-    };
-  });
+function emptyDraft(): QuestionDraft {
+  return {
+    stage: 1, level: "3pt", year: null, grade_group: "",
+    text_fa: "", text_en: "",
+    text_fa_2: "", text_en_2: "",
+    text_fa_3: "", text_en_3: "",
+    question_image_url: "",
+    question_image_small: false, question_image_strip: false,
+    question_extra_images: "",
+    question_extra_images_full: false,
+    hint_fa: "", hint_en: "",
+    correct: "", skills: "",
+    options: OPTION_KEYS.map((k) => ({ option_key: k, text_fa: "", text_en: "", image_url: "" })),
+  };
 }
 
-export default function QuestionForm({ question, options, action }: Props) {
+export function initDraftFromRow(row: Record<string, unknown>, opts: Record<string, string>[]): QuestionDraft {
+  return {
+    id: row.id as number,
+    stage: (row.stage as number) ?? 1,
+    level: (row.level as string) ?? "3pt",
+    year: (row.year as number | null) ?? null,
+    grade_group: (row.grade_group as string) ?? "",
+    text_fa: (row.text_fa as string) ?? "",
+    text_en: (row.text_en as string) ?? "",
+    text_fa_2: (row.text_fa_2 as string) ?? "",
+    text_en_2: (row.text_en_2 as string) ?? "",
+    text_fa_3: (row.text_fa_3 as string) ?? "",
+    text_en_3: (row.text_en_3 as string) ?? "",
+    question_image_url: (row.question_image_url as string) ?? "",
+    question_image_small: (row.question_image_small as boolean) ?? false,
+    question_image_strip: (row.question_image_strip as boolean) ?? false,
+    question_extra_images: ((row.question_extra_images as string[]) ?? []).join("\n"),
+    question_extra_images_full: (row.question_extra_images_full as boolean) ?? false,
+    hint_fa: (row.hint_fa as string) ?? "",
+    hint_en: (row.hint_en as string) ?? "",
+    correct: (row.correct as string) ?? "",
+    skills: ((row.skills as string[]) ?? []).join("\n"),
+    options: OPTION_KEYS.map((k) => {
+      const o = opts.find((x) => x.option_key === k);
+      return { option_key: k, text_fa: o?.text_fa ?? "", text_en: o?.text_en ?? "", image_url: o?.image_url ?? "" };
+    }),
+  };
+}
+
+const labelStyle: React.CSSProperties = { display: "block", fontSize: 13, color: "#94a3b8", marginBottom: 4, marginTop: 14 };
+const inputStyle: React.CSSProperties = { width: "100%", background: "#0f172a", border: "1px solid #334155", borderRadius: 6, padding: "8px 10px", color: "#f1f5f9", fontSize: 14, boxSizing: "border-box" };
+const sectionStyle: React.CSSProperties = { background: "#1e293b", borderRadius: 10, padding: 20, marginBottom: 20 };
+
+export default function QuestionForm({ initial }: { initial?: QuestionDraft }) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(null);
-  const [opts, setOpts] = useState<OptionDraft[]>(initOptions(options));
+  const [draft, setDraft] = useState<QuestionDraft>(initial ?? emptyDraft());
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  const fieldStyle = {
-    border: "1px solid #ccc",
-    borderRadius: 6,
-    padding: "8px 10px",
-    width: "100%",
-    fontSize: 14,
-    background: "#fff",
-    fontFamily: "inherit",
-  };
-
-  const labelStyle = {
-    display: "block",
-    marginBottom: 4,
-    fontSize: 13,
-    fontWeight: 500,
-    color: "#333",
-  };
-
-  function handleOptChange(
-    idx: number,
-    field: keyof Omit<OptionDraft, "option_key">,
-    value: string
-  ) {
-    setOpts((prev) => prev.map((o, i) => (i === idx ? { ...o, [field]: value } : o)));
+  function set<K extends keyof QuestionDraft>(key: K, val: QuestionDraft[K]) {
+    setDraft((d) => ({ ...d, [key]: val }));
+  }
+  function setOpt(idx: number, key: keyof OptionDraft, val: string) {
+    setDraft((d) => {
+      const opts = [...d.options];
+      opts[idx] = { ...opts[idx], [key]: val };
+      return { ...d, options: opts };
+    });
   }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError(null);
-    const fd = new FormData(e.currentTarget);
-    // inject options
-    opts.forEach((o, i) => {
-      fd.set(`opt_key_${i}`, o.option_key);
-      fd.set(`opt_text_fa_${i}`, o.text_fa);
-      fd.set(`opt_text_en_${i}`, o.text_en);
-      fd.set(`opt_image_url_${i}`, o.image_url);
-    });
-    startTransition(async () => {
-      const result = await action(fd);
-      if (result?.error) {
-        setError(result.error);
-      } else {
-        router.push("/admin/questions");
-        router.refresh();
-      }
-    });
+  async function save() {
+    if (!draft.text_fa.trim()) { setError("متن سوال الزامی است"); return; }
+    if (!draft.correct.trim()) { setError("جواب صحیح الزامی است"); return; }
+    setSaving(true); setError("");
+
+    const payload = {
+      stage: draft.stage, level: draft.level,
+      year: draft.year || null, grade_group: draft.grade_group || null,
+      text_fa: draft.text_fa, text_en: draft.text_en || null,
+      text_fa_2: draft.text_fa_2 || null, text_en_2: draft.text_en_2 || null,
+      text_fa_3: draft.text_fa_3 || null, text_en_3: draft.text_en_3 || null,
+      question_image_url: draft.question_image_url || null,
+      question_image_small: draft.question_image_small,
+      question_image_strip: draft.question_image_strip,
+      question_extra_images: draft.question_extra_images ? draft.question_extra_images.split("\n").filter(Boolean) : null,
+      question_extra_images_full: draft.question_extra_images_full,
+      hint_fa: draft.hint_fa || null, hint_en: draft.hint_en || null,
+      correct: draft.correct,
+      skills: draft.skills ? draft.skills.split("\n").filter(Boolean) : null,
+    };
+
+    let questionId = draft.id;
+    if (questionId) {
+      const { error: e } = await supabase.from("questions").update(payload).eq("id", questionId);
+      if (e) { setError(e.message); setSaving(false); return; }
+      await supabase.from("question_options").delete().eq("question_id", questionId);
+    } else {
+      const { data, error: e } = await supabase.from("questions").insert(payload).select("id").single();
+      if (e || !data) { setError(e?.message ?? "خطا در ذخیره"); setSaving(false); return; }
+      questionId = (data as { id: number }).id;
+    }
+
+    const optRows = draft.options
+      .filter((o) => o.text_fa || o.text_en || o.image_url)
+      .map((o, i) => ({ question_id: questionId!, option_key: o.option_key, text_fa: o.text_fa || null, text_en: o.text_en || null, image_url: o.image_url || null, sort_order: i }));
+
+    if (optRows.length) {
+      const { error: oe } = await supabase.from("question_options").insert(optRows);
+      if (oe) { setError(oe.message); setSaving(false); return; }
+    }
+
+    router.push("/lumio/admin/questions");
   }
 
   return (
-    <form onSubmit={handleSubmit} dir="rtl" className="max-w-3xl">
-      {error && (
-        <div
-          className="p-3 rounded mb-4 text-sm"
-          style={{ background: "#fdecea", color: "var(--color-error)" }}
-        >
-          {error}
-        </div>
-      )}
+    <div style={{ maxWidth: 820 }}>
+      {error && <div style={{ background: "#7f1d1d", color: "#fca5a5", padding: "10px 14px", borderRadius: 8, marginBottom: 16 }}>{error}</div>}
 
-      {/* Basic fields */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <label style={labelStyle}>مرحله (Stage) *</label>
-          <input
-            name="stage"
-            type="number"
-            required
-            defaultValue={question?.stage ?? ""}
-            style={fieldStyle}
-          />
-        </div>
-        <div>
-          <label style={labelStyle}>سطح (Level) *</label>
-          <select name="level" required defaultValue={question?.level ?? "3pt"} style={fieldStyle}>
-            {LEVEL_OPTIONS.map((l) => (
-              <option key={l} value={l}>
-                {l}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label style={labelStyle}>سال (Year)</label>
-          <input
-            name="year"
-            type="number"
-            defaultValue={question?.year ?? ""}
-            style={fieldStyle}
-          />
-        </div>
-        <div>
-          <label style={labelStyle}>گروه پایه (Grade Group)</label>
-          <input
-            name="grade_group"
-            defaultValue={question?.grade_group ?? ""}
-            style={fieldStyle}
-          />
+      <div style={sectionStyle}>
+        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>اطلاعات اصلی</h2>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>
+          <div>
+            <span style={labelStyle}>مرحله *</span>
+            <input style={inputStyle} type="number" value={draft.stage} min={1} onChange={(e) => set("stage", +e.target.value)} />
+          </div>
+          <div>
+            <span style={labelStyle}>سطح *</span>
+            <select style={inputStyle} value={draft.level} onChange={(e) => set("level", e.target.value)}>
+              {LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
+            </select>
+          </div>
+          <div>
+            <span style={labelStyle}>سال</span>
+            <input style={inputStyle} type="number" value={draft.year ?? ""} onChange={(e) => set("year", e.target.value ? +e.target.value : null)} />
+          </div>
+          <div>
+            <span style={labelStyle}>گروه پایه</span>
+            <input style={inputStyle} value={draft.grade_group} onChange={(e) => set("grade_group", e.target.value)} placeholder="مثال: 1-2" />
+          </div>
         </div>
       </div>
 
-      {/* Question texts */}
-      <div className="mb-4">
-        <label style={labelStyle}>متن سوال (فارسی) *</label>
-        <textarea
-          name="text_fa"
-          required
-          defaultValue={question?.text_fa ?? ""}
-          rows={3}
-          style={fieldStyle}
-        />
-      </div>
-      <div className="mb-4">
-        <label style={labelStyle}>متن سوال (انگلیسی)</label>
-        <textarea
-          name="text_en"
-          defaultValue={question?.text_en ?? ""}
-          rows={2}
-          style={fieldStyle}
-          dir="ltr"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <label style={labelStyle}>متن دوم (فارسی)</label>
-          <textarea name="text_fa_2" defaultValue={question?.text_fa_2 ?? ""} rows={2} style={fieldStyle} />
-        </div>
-        <div>
-          <label style={labelStyle}>متن دوم (انگلیسی)</label>
-          <textarea name="text_en_2" defaultValue={question?.text_en_2 ?? ""} rows={2} style={fieldStyle} dir="ltr" />
-        </div>
-        <div>
-          <label style={labelStyle}>متن سوم (فارسی)</label>
-          <textarea name="text_fa_3" defaultValue={question?.text_fa_3 ?? ""} rows={2} style={fieldStyle} />
-        </div>
-        <div>
-          <label style={labelStyle}>متن سوم (انگلیسی)</label>
-          <textarea name="text_en_3" defaultValue={question?.text_en_3 ?? ""} rows={2} style={fieldStyle} dir="ltr" />
-        </div>
+      <div style={sectionStyle}>
+        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>متن سوال</h2>
+        <span style={labelStyle}>متن فارسی *</span>
+        <textarea style={{ ...inputStyle, minHeight: 80 }} value={draft.text_fa} onChange={(e) => set("text_fa", e.target.value)} />
+        <span style={labelStyle}>متن انگلیسی</span>
+        <textarea style={{ ...inputStyle, minHeight: 60 }} value={draft.text_en} onChange={(e) => set("text_en", e.target.value)} />
+        <span style={labelStyle}>متن دوم فارسی (اختیاری)</span>
+        <input style={inputStyle} value={draft.text_fa_2} onChange={(e) => set("text_fa_2", e.target.value)} />
+        <span style={labelStyle}>متن دوم انگلیسی (اختیاری)</span>
+        <input style={inputStyle} value={draft.text_en_2} onChange={(e) => set("text_en_2", e.target.value)} />
       </div>
 
-      {/* Images */}
-      <div className="mb-4">
-        <label style={labelStyle}>آدرس تصویر سوال</label>
-        <input
-          name="question_image_url"
-          defaultValue={question?.question_image_url ?? ""}
-          style={fieldStyle}
-          dir="ltr"
-          placeholder="/images/q1.png"
-        />
-      </div>
-      <div className="flex gap-6 mb-4">
-        <label className="flex items-center gap-2 text-sm cursor-pointer">
-          <input
-            type="checkbox"
-            name="question_image_small"
-            defaultChecked={question?.question_image_small ?? false}
-          />
-          تصویر کوچک
-        </label>
-        <label className="flex items-center gap-2 text-sm cursor-pointer">
-          <input
-            type="checkbox"
-            name="question_image_strip"
-            defaultChecked={question?.question_image_strip ?? false}
-          />
-          تصویر نواری
-        </label>
-        <label className="flex items-center gap-2 text-sm cursor-pointer">
-          <input
-            type="checkbox"
-            name="question_extra_images_full"
-            defaultChecked={question?.question_extra_images_full ?? false}
-          />
-          تصاویر اضافه تمام‌عرض
-        </label>
-      </div>
-      <div className="mb-4">
-        <label style={labelStyle}>تصاویر اضافه (هر آدرس در یک خط)</label>
-        <textarea
-          name="question_extra_images"
-          defaultValue={(question?.question_extra_images ?? []).join("\n")}
-          rows={3}
-          style={fieldStyle}
-          dir="ltr"
-          placeholder="/images/extra1.png&#10;/images/extra2.png"
-        />
-      </div>
-
-      {/* Hint */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <label style={labelStyle}>راهنما (فارسی)</label>
-          <textarea name="hint_fa" defaultValue={question?.hint_fa ?? ""} rows={2} style={fieldStyle} />
+      <div style={sectionStyle}>
+        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>تصویر سوال</h2>
+        <span style={labelStyle}>آدرس تصویر اصلی</span>
+        <input style={inputStyle} value={draft.question_image_url} onChange={(e) => set("question_image_url", e.target.value)} placeholder="/lumio/images/questions/..." />
+        <div style={{ display: "flex", gap: 24, marginTop: 10 }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#94a3b8", cursor: "pointer" }}>
+            <input type="checkbox" checked={draft.question_image_small} onChange={(e) => set("question_image_small", e.target.checked)} />
+            تصویر کوچک
+          </label>
+          <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#94a3b8", cursor: "pointer" }}>
+            <input type="checkbox" checked={draft.question_image_strip} onChange={(e) => set("question_image_strip", e.target.checked)} />
+            نوار افقی
+          </label>
         </div>
-        <div>
-          <label style={labelStyle}>راهنما (انگلیسی)</label>
-          <textarea name="hint_en" defaultValue={question?.hint_en ?? ""} rows={2} style={fieldStyle} dir="ltr" />
-        </div>
+        <span style={labelStyle}>تصاویر اضافی (هر آدرس در یک خط)</span>
+        <textarea style={{ ...inputStyle, minHeight: 60 }} value={draft.question_extra_images} onChange={(e) => set("question_extra_images", e.target.value)} />
       </div>
 
-      {/* Correct answer */}
-      <div className="mb-4">
-        <label style={labelStyle}>پاسخ صحیح *</label>
-        <input
-          name="correct"
-          required
-          defaultValue={question?.correct ?? ""}
-          style={fieldStyle}
-          placeholder="مثال: A یا نام فایل تصویر"
-        />
+      <div style={sectionStyle}>
+        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>گزینه‌ها (A تا E)</h2>
+        {draft.options.map((opt, i) => (
+          <div key={opt.option_key} style={{ borderBottom: i < 4 ? "1px solid #334155" : "none", paddingBottom: 12, marginBottom: 12 }}>
+            <span style={{ ...labelStyle, color: "#6366f1", marginTop: 0, fontWeight: 700 }}>گزینه {opt.option_key}</span>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 2fr", gap: 10 }}>
+              <div>
+                <span style={labelStyle}>متن فارسی</span>
+                <input style={inputStyle} value={opt.text_fa} onChange={(e) => setOpt(i, "text_fa", e.target.value)} />
+              </div>
+              <div>
+                <span style={labelStyle}>متن انگلیسی</span>
+                <input style={inputStyle} value={opt.text_en} onChange={(e) => setOpt(i, "text_en", e.target.value)} />
+              </div>
+              <div>
+                <span style={labelStyle}>آدرس تصویر گزینه</span>
+                <input style={inputStyle} value={opt.image_url} onChange={(e) => setOpt(i, "image_url", e.target.value)} />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Skills */}
-      <div className="mb-6">
-        <label style={labelStyle}>مهارت‌ها (هر مهارت در یک خط)</label>
-        <textarea
-          name="skills"
-          defaultValue={(question?.skills ?? []).join("\n")}
-          rows={2}
-          style={fieldStyle}
-          placeholder="جمع&#10;تفریق"
-        />
+      <div style={sectionStyle}>
+        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>جواب و راهنمایی</h2>
+        <span style={labelStyle}>جواب صحیح * (کلید گزینه مثل A یا نام فایل تصویر)</span>
+        <input style={inputStyle} value={draft.correct} onChange={(e) => set("correct", e.target.value)} placeholder="مثال: A" />
+        <span style={labelStyle}>راهنمایی فارسی</span>
+        <textarea style={{ ...inputStyle, minHeight: 70 }} value={draft.hint_fa} onChange={(e) => set("hint_fa", e.target.value)} />
+        <span style={labelStyle}>راهنمایی انگلیسی</span>
+        <textarea style={{ ...inputStyle, minHeight: 70 }} value={draft.hint_en} onChange={(e) => set("hint_en", e.target.value)} />
+        <span style={labelStyle}>مهارت‌ها (هر مهارت در یک خط)</span>
+        <textarea style={{ ...inputStyle, minHeight: 60 }} value={draft.skills} onChange={(e) => set("skills", e.target.value)} placeholder={"counting\nmatching"} />
       </div>
 
-      {/* Options */}
-      <div className="mb-6">
-        <h2 className="text-base font-bold mb-3">گزینه‌ها</h2>
-        <div className="rounded border overflow-hidden" style={{ borderColor: "#ddd" }}>
-          <table className="w-full text-sm">
-            <thead style={{ background: "#f5f5f5" }}>
-              <tr>
-                <th className="px-3 py-2 text-right w-12">کلید</th>
-                <th className="px-3 py-2 text-right">متن فارسی</th>
-                <th className="px-3 py-2 text-right">متن انگلیسی</th>
-                <th className="px-3 py-2 text-right">آدرس تصویر</th>
-              </tr>
-            </thead>
-            <tbody>
-              {opts.map((opt, i) => (
-                <tr key={opt.option_key} style={{ borderTop: "1px solid #eee" }}>
-                  <td className="px-3 py-2 font-bold text-center" style={{ color: "var(--color-primary)" }}>
-                    {opt.option_key}
-                  </td>
-                  <td className="px-3 py-2">
-                    <input
-                      value={opt.text_fa}
-                      onChange={(e) => handleOptChange(i, "text_fa", e.target.value)}
-                      style={{ ...fieldStyle, padding: "5px 8px" }}
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input
-                      value={opt.text_en}
-                      onChange={(e) => handleOptChange(i, "text_en", e.target.value)}
-                      dir="ltr"
-                      style={{ ...fieldStyle, padding: "5px 8px" }}
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input
-                      value={opt.image_url}
-                      onChange={(e) => handleOptChange(i, "image_url", e.target.value)}
-                      dir="ltr"
-                      style={{ ...fieldStyle, padding: "5px 8px" }}
-                      placeholder="/images/opt.png"
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="flex gap-3">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="px-6 py-2 rounded font-medium text-sm text-white"
-          style={{ background: isPending ? "#aaa" : "var(--color-primary-btn)", cursor: isPending ? "not-allowed" : "pointer" }}
-        >
-          {isPending ? "در حال ذخیره..." : "ذخیره"}
+      <div style={{ display: "flex", gap: 12, marginBottom: 40 }}>
+        <button onClick={save} disabled={saving}
+          style={{ background: "#6366f1", color: "#fff", padding: "10px 28px", borderRadius: 8, border: "none", cursor: saving ? "not-allowed" : "pointer", fontSize: 15, opacity: saving ? 0.7 : 1 }}>
+          {saving ? "در حال ذخیره…" : "ذخیره"}
         </button>
-        <button
-          type="button"
-          onClick={() => router.push("/admin/questions")}
-          className="px-6 py-2 rounded font-medium text-sm"
-          style={{ background: "#e0e0e0", cursor: "pointer" }}
-        >
+        <button onClick={() => router.push("/lumio/admin/questions")}
+          style={{ background: "#334155", color: "#f1f5f9", padding: "10px 20px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 15 }}>
           انصراف
         </button>
       </div>
-    </form>
+    </div>
   );
 }
