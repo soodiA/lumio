@@ -4,10 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { usernameToEmail } from "@/lib/username-auth";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,9 +17,12 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email: usernameToEmail(username),
+      password,
+    });
     if (error) {
-      setError("ایمیل یا رمز اشتباه است");
+      setError("نام کاربری یا رمز اشتباه است");
     } else {
       router.push("/grade");
     }
@@ -35,18 +39,18 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium" style={{ color: "#555" }}>ایمیل</label>
+            <label className="text-sm font-medium" style={{ color: "#555" }}>نام کاربری</label>
             <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
+              type="text"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
               required
               dir="ltr"
               className="w-full px-4 py-3 rounded-xl border text-base outline-none transition-all"
               style={{ border: "2px solid #E5E7EB", background: "#FAFAFA" }}
               onFocus={e => e.target.style.borderColor = "#42A5F5"}
               onBlur={e => e.target.style.borderColor = "#E5E7EB"}
-              placeholder="example@email.com"
+              placeholder="مثلاً: ali_1234"
             />
           </div>
 

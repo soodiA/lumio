@@ -21,7 +21,9 @@ export default function ProfilePage() {
     );
   }
 
-  const displayName = user.user_metadata?.display_name ?? user.email ?? "کاربر";
+  const username = user.user_metadata?.username as string | undefined;
+  const phone = user.user_metadata?.phone as string | undefined;
+  const displayName = user.user_metadata?.display_name ?? username ?? "کاربر";
   const avatarLetter = displayName[0]?.toUpperCase() ?? "?";
 
   const handleSignOut = async () => {
@@ -48,7 +50,8 @@ export default function ProfilePage() {
           </div>
           <div className="text-center">
             <p className="text-xl font-bold" style={{ color: "#1a1a1a" }}>{displayName}</p>
-            <p className="text-sm mt-1" style={{ color: "#888" }} dir="ltr">{user.email}</p>
+            {username && <p className="text-sm mt-1" style={{ color: "#888" }} dir="ltr">@{username}</p>}
+            {phone && <p className="text-sm mt-1" style={{ color: "#888" }} dir="ltr">{phone}</p>}
           </div>
         </div>
 

@@ -4,11 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { usernameToEmail, validateUsername, validatePhone } from "@/lib/username-auth";
 
 export default function SignupPage() {
   const router = useRouter();
-  const [displayName, setDisplayName] = useState("");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,15 +17,25 @@ export default function SignupPage() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    const usernameErr = validateUsername(username);
+    if (usernameErr) { setError(usernameErr); return; }
+    const phoneErr = validatePhone(phone);
+    if (phoneErr) { setError(phoneErr); return; }
     if (password.length < 6) { setError("رمز باید حداقل ۶ کاراکتر باشد"); return; }
+
     setLoading(true);
     const { error } = await supabase.auth.signUp({
-      email,
+      email: usernameToEmail(username),
       password,
-      options: { data: { display_name: displayName } },
+      options: { data: { username: username.trim(), display_name: username.trim(), phone: phone.trim() } },
     });
     if (error) {
-      setError(error.message.includes("already") ? "این ایمیل قبلاً ثبت شده" : "خطا در ثبت‌نام");
+      setError(
+        /duplicate|unique|already/i.test(error.message)
+          ? "این نام کاربری قبلاً استفاده شده"
+          : "خطا در ثبت‌نام"
+      );
     } else {
       router.push("/grade");
     }
@@ -41,34 +52,34 @@ export default function SignupPage() {
 
         <form onSubmit={handleSignup} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium" style={{ color: "#555" }}>نام نمایشی</label>
+            <label className="text-sm font-medium" style={{ color: "#555" }}>نام کاربری</label>
             <input
               type="text"
-              value={displayName}
-              onChange={e => setDisplayName(e.target.value)}
-              required
-              dir="rtl"
-              className="w-full px-4 py-3 rounded-xl border text-base outline-none transition-all"
-              style={{ border: "2px solid #E5E7EB", background: "#FAFAFA" }}
-              onFocus={e => e.target.style.borderColor = "#42A5F5"}
-              onBlur={e => e.target.style.borderColor = "#E5E7EB"}
-              placeholder="مثلاً: علی محمدی"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium" style={{ color: "#555" }}>ایمیل</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
+              value={username}
+              onChange={e => setUsername(e.target.value)}
               required
               dir="ltr"
               className="w-full px-4 py-3 rounded-xl border text-base outline-none transition-all"
               style={{ border: "2px solid #E5E7EB", background: "#FAFAFA" }}
               onFocus={e => e.target.style.borderColor = "#42A5F5"}
               onBlur={e => e.target.style.borderColor = "#E5E7EB"}
-              placeholder="example@email.com"
+              placeholder="مثلاً: ali_1234"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium" style={{ color: "#555" }}>شماره تلفن</label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              required
+              dir="ltr"
+              className="w-full px-4 py-3 rounded-xl border text-base outline-none transition-all"
+              style={{ border: "2px solid #E5E7EB", background: "#FAFAFA" }}
+              onFocus={e => e.target.style.borderColor = "#42A5F5"}
+              onBlur={e => e.target.style.borderColor = "#E5E7EB"}
+              placeholder="09123456789"
             />
           </div>
 
