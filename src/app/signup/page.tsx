@@ -11,6 +11,7 @@ export default function SignupPage() {
   const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -25,19 +26,29 @@ export default function SignupPage() {
     if (password.length < 6) { setError("رمز باید حداقل ۶ کاراکتر باشد"); return; }
 
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email: usernameToEmail(username),
-      password,
-      options: { data: { username: username.trim(), display_name: username.trim(), phone: phone.trim() } },
-    });
-    if (error) {
-      setError(
-        /duplicate|unique|already/i.test(error.message)
-          ? "این نام کاربری قبلاً استفاده شده"
-          : "خطا در ثبت‌نام"
-      );
-    } else {
-      router.push("/grade");
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: usernameToEmail(username),
+        password,
+        options: { data: { username: username.trim(), display_name: username.trim(), phone: phone.trim() } },
+      });
+      if (error) {
+        if (/duplicate|unique|already/i.test(error.message)) {
+          setError("این نام کاربری قبلاً استفاده شده");
+        } else if (/password/i.test(error.message)) {
+          setError("رمز عبور معتبر نیست: " + error.message);
+        } else if (/email/i.test(error.message)) {
+          setError("نام کاربری معتبر نیست، لطفاً حروف/اعداد دیگری امتحان کن");
+        } else if (/rate limit|security purposes/i.test(error.message)) {
+          setError("درخواست‌های زیاد. کمی صبر کن و دوباره امتحان کن");
+        } else {
+          setError(`خطا در ثبت‌نام: ${error.message}`);
+        }
+      } else {
+        router.push("/grade");
+      }
+    } catch {
+      setError("خطا در اتصال به سرور. اتصال اینترنت را بررسی کن و دوباره تلاش کن");
     }
     setLoading(false);
   };
@@ -86,7 +97,7 @@ export default function SignupPage() {
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium" style={{ color: "#555" }}>رمز عبور</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
@@ -97,6 +108,14 @@ export default function SignupPage() {
               onBlur={e => e.target.style.borderColor = "#E5E7EB"}
               placeholder="حداقل ۶ کاراکتر"
             />
+            <label className="flex items-center gap-2 text-sm mt-1" style={{ color: "#777" }}>
+              <input
+                type="checkbox"
+                checked={showPassword}
+                onChange={e => setShowPassword(e.target.checked)}
+              />
+              نمایش رمز عبور
+            </label>
           </div>
 
           {error && (
