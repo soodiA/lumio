@@ -8,13 +8,13 @@ export function usernameToEmail(username: string): string {
   return `${username.trim().toLowerCase()}@${EMAIL_DOMAIN}`;
 }
 
-const USERNAME_RE = /^[a-zA-Z0-9_؀-ۿ]{3,20}$/;
+const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 
 export function validateUsername(username: string): string | null {
   const v = username.trim();
   if (v.length < 3) return "نام کاربری باید حداقل ۳ کاراکتر باشد";
   if (v.length > 20) return "نام کاربری باید حداکثر ۲۰ کاراکتر باشد";
-  if (!USERNAME_RE.test(v)) return "نام کاربری فقط می‌تواند حروف، عدد و _ داشته باشد";
+  if (!USERNAME_RE.test(v)) return "نام کاربری فقط می‌تواند حروف انگلیسی، عدد و _ داشته باشد (بدون فاصله یا حروف فارسی)";
   return null;
 }
 
