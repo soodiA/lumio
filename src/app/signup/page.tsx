@@ -35,12 +35,12 @@ export default function SignupPage() {
       if (error) {
         if (/duplicate|unique|already/i.test(error.message)) {
           setError("این نام کاربری قبلاً استفاده شده");
+        } else if (/rate limit|security purposes/i.test(error.message)) {
+          setError("سیستم موقتاً درخواست‌های ثبت‌نام رو محدود کرده (به‌خاطر تنظیم ایمیل تأیید در سوپابیس). چند دقیقه صبر کن یا این تنظیم رو خاموش کن");
         } else if (/password/i.test(error.message)) {
           setError("رمز عبور معتبر نیست: " + error.message);
-        } else if (/email/i.test(error.message)) {
+        } else if (/email/i.test(error.message) && /format|invalid/i.test(error.message)) {
           setError("نام کاربری معتبر نیست، لطفاً حروف/اعداد دیگری امتحان کن");
-        } else if (/rate limit|security purposes/i.test(error.message)) {
-          setError("درخواست‌های زیاد. کمی صبر کن و دوباره امتحان کن");
         } else {
           setError(`خطا در ثبت‌نام: ${error.message}`);
         }
