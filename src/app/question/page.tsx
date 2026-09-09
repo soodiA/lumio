@@ -24,6 +24,8 @@ type Question = {
   options: QuestionOption[];
 };
 
+const LEVEL_ORDER: Record<string, number> = { "3pt": 0, "4pt": 1, "5pt": 2 };
+
 function shuffleWithSeed<T>(arr: T[], seed: number): T[] {
   const copy = [...arr];
   let s = seed;
@@ -88,7 +90,13 @@ function QuestionContent() {
           .map((o) => ({ id: o.option_key, text_en: o.text_en ?? "", text_fa: o.text_fa ?? "", image_url: o.image_url ?? undefined })),
       }));
 
-      setStageQuestions(shuffleWithSeed(questions, stage * 1000 + grade.charCodeAt(0)));
+      // Shuffle within each difficulty level for variety, then order the
+      // levels themselves 3pt -> 4pt -> 5pt (easiest first).
+      const shuffled = shuffleWithSeed(questions, stage * 1000 + grade.charCodeAt(0));
+      const ordered = [...shuffled].sort(
+        (a, b) => (LEVEL_ORDER[a.level] ?? 99) - (LEVEL_ORDER[b.level] ?? 99)
+      );
+      setStageQuestions(ordered);
       setLoading(false);
     }
     loadQuestions();
