@@ -52,7 +52,7 @@ export default function SplashPage() {
             style={{ background: "#EFF6FF", color: "#42A5F5" }}
           >
             <span>👤</span>
-            <span>{user.user_metadata?.display_name ?? user.email}</span>
+            <span>{user.display_name}</span>
           </Link>
         ) : (
           <Link

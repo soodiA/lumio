@@ -3,11 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
-import { usernameToEmail } from "@/lib/username-auth";
+import { api, type AuthUser } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { signIn } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -17,14 +18,13 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: usernameToEmail(username),
-      password,
-    });
-    if (error) {
-      setError("نام کاربری یا رمز اشتباه است");
-    } else {
+    try {
+      const res = await api<{ token: string; user: AuthUser }>("/api/v1/auth/login", { method: "POST", body: { username, password } });
+      signIn(res.token, res.user);
       router.push("/grade");
+    } catch (err) {
+      const status = (err as { status?: number }).status;
+      setError(status === 401 ? "نام کاربری یا رمز اشتباه است" : "خطا در اتصال به سرور. دوباره تلاش کن");
     }
     setLoading(false);
   };

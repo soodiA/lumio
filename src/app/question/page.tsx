@@ -3,12 +3,7 @@
 import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { api, type ApiQuestion } from "@/lib/api";
 
 type QuestionOption = { id: string; text_en: string; text_fa: string; image_url?: string };
 type Question = {
@@ -61,34 +56,23 @@ function QuestionContent() {
   useEffect(() => {
     async function loadQuestions() {
       setLoading(true);
-      // Fetch questions for this grade+stage
-      const { data: rows, error } = await supabase
-        .from("questions")
-        .select("*")
-        .eq("grade_group", grade)
-        .eq("stage", stage);
-
-      if (error || !rows || rows.length === 0) {
+      // Questions (with options) come from the Lumio API / Postgres
+      let rows: ApiQuestion[] = [];
+      try {
+        rows = await api<ApiQuestion[]>(`/api/v1/questions?grade=${encodeURIComponent(grade)}&stage=${stage}`);
+      } catch {
+        rows = [];
+      }
+      if (rows.length === 0) {
         setStageQuestions([]);
         setLoading(false);
         return;
       }
 
-      // Fetch all options for these questions
-      const ids = rows.map((r) => r.id);
-      const { data: optRows } = await supabase
-        .from("question_options")
-        .select("*")
-        .in("question_id", ids)
-        .order("sort_order");
-
-      // Assemble
-      const questions: Question[] = rows.map((r) => ({
+      const questions = rows.map((r) => ({
         ...r,
-        options: (optRows ?? [])
-          .filter((o) => o.question_id === r.id)
-          .map((o) => ({ id: o.option_key, text_en: o.text_en ?? "", text_fa: o.text_fa ?? "", image_url: o.image_url ?? undefined })),
-      }));
+        options: r.options.map((o) => ({ id: o.option_key, text_en: o.text_en ?? "", text_fa: o.text_fa ?? "", image_url: o.image_url ?? undefined })),
+      })) as unknown as Question[];
 
       // Shuffle within each difficulty level for variety, then order the
       // levels themselves 3pt -> 4pt -> 5pt (easiest first).

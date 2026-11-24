@@ -2,13 +2,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { api } from "@/lib/api";
 import QuestionForm, { initDraftFromRow, QuestionDraft } from "../_components/QuestionForm";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 function EditContent() {
   const params = useSearchParams();
@@ -19,10 +14,10 @@ function EditContent() {
   useEffect(() => {
     if (!id) { setNotFound(true); return; }
     async function load() {
-      const { data: row } = await supabase.from("questions").select("*").eq("id", id).single();
-      if (!row) { setNotFound(true); return; }
-      const { data: opts } = await supabase.from("question_options").select("*").eq("question_id", id).order("sort_order");
-      setDraft(initDraftFromRow(row as Record<string, unknown>, (opts ?? []) as Record<string, string>[]));
+      try {
+        const row = await api<Record<string, unknown> & { options: Record<string, string>[] }>(`/api/v1/admin/questions/${id}`, { admin: true });
+        setDraft(initDraftFromRow(row, row.options ?? []));
+      } catch { setNotFound(true); }
     }
     load();
   }, [id]);

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
 interface LeaderboardRow {
@@ -21,15 +21,10 @@ export default function LeaguePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase
-      .from("leaderboard")
-      .select("user_id, display_name, total_points, total_stars, stages_completed")
-      .order("total_points", { ascending: false })
-      .limit(50)
-      .then(({ data }) => {
-        setRows((data as LeaderboardRow[]) ?? []);
-        setLoading(false);
-      });
+    api<LeaderboardRow[]>("/api/v1/leaderboard")
+      .then((data) => setRows(data ?? []))
+      .catch(() => setRows([]))
+      .finally(() => setLoading(false));
   }, []);
 
   const myRank = rows.findIndex(r => r.user_id === user?.id) + 1;

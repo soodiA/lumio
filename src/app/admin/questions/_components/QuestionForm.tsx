@@ -1,12 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { api } from "@/lib/api";
 
 const OPTION_KEYS = ["A", "B", "C", "D", "E"];
 const LEVELS = ["3pt", "4pt", "5pt"];
@@ -115,24 +110,18 @@ export default function QuestionForm({ initial }: { initial?: QuestionDraft }) {
       skills: draft.skills ? draft.skills.split("\n").filter(Boolean) : null,
     };
 
-    let questionId = draft.id;
-    if (questionId) {
-      const { error: e } = await supabase.from("questions").update(payload).eq("id", questionId);
-      if (e) { setError(e.message); setSaving(false); return; }
-      await supabase.from("question_options").delete().eq("question_id", questionId);
-    } else {
-      const { data, error: e } = await supabase.from("questions").insert(payload).select("id").single();
-      if (e || !data) { setError(e?.message ?? "خطا در ذخیره"); setSaving(false); return; }
-      questionId = (data as { id: number }).id;
-    }
-
-    const optRows = draft.options
+    const options = draft.options
       .filter((o) => o.text_fa || o.text_en || o.image_url)
-      .map((o, i) => ({ question_id: questionId!, option_key: o.option_key, text_fa: o.text_fa || null, text_en: o.text_en || null, image_url: o.image_url || null, sort_order: i }));
+      .map((o, i) => ({ option_key: o.option_key, text_fa: o.text_fa || null, text_en: o.text_en || null, image_url: o.image_url || null, sort_order: i }));
 
-    if (optRows.length) {
-      const { error: oe } = await supabase.from("question_options").insert(optRows);
-      if (oe) { setError(oe.message); setSaving(false); return; }
+    try {
+      if (draft.id) {
+        await api(`/api/v1/admin/questions/${draft.id}`, { method: "PUT", body: { ...payload, options }, admin: true });
+      } else {
+        await api("/api/v1/admin/questions", { method: "POST", body: { ...payload, options }, admin: true });
+      }
+    } catch (e) {
+      setError((e as Error).message || "خطا در ذخیره"); setSaving(false); return;
     }
 
     router.push("/admin/questions");
@@ -181,7 +170,7 @@ export default function QuestionForm({ initial }: { initial?: QuestionDraft }) {
       <div style={sectionStyle}>
         <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>تصویر سوال</h2>
         <span style={labelStyle}>آدرس تصویر اصلی</span>
-        <input style={inputStyle} value={draft.question_image_url} onChange={(e) => set("question_image_url", e.target.value)} placeholder="/lumio/images/questions/..." />
+        <input style={inputStyle} value={draft.question_image_url} onChange={(e) => set("question_image_url", e.target.value)} placeholder="/images/questions/..." />
         <div style={{ display: "flex", gap: 24, marginTop: 10 }}>
           <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#94a3b8", cursor: "pointer" }}>
             <input type="checkbox" checked={draft.question_image_small} onChange={(e) => set("question_image_small", e.target.checked)} />

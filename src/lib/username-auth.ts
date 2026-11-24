@@ -1,13 +1,4 @@
-// Supabase Auth requires an email internally; we hide that behind a username-only
-// UI by deriving a deterministic, never-delivered address from the username.
-// This must stay 1:1 and collision-free with real emails, so it uses a reserved
-// subdomain no one else can sign up under.
-const EMAIL_DOMAIN = "users.lumio.app";
-
-export function usernameToEmail(username: string): string {
-  return `${username.trim().toLowerCase()}@${EMAIL_DOMAIN}`;
-}
-
+// Username/phone validation shared by the signup form (the API enforces the same rules).
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 
 export function validateUsername(username: string): string | null {

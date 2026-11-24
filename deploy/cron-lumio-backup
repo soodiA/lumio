@@ -1,0 +1,1 @@
+23 3 * * * root /srv/lumio/bin/backup.sh >> /srv/lumio/backups/backup.log 2>&1

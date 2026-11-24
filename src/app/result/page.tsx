@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { api, getToken } from "@/lib/api";
 
 const MAX_WRONG_TO_PASS = 3;
 
@@ -26,6 +27,15 @@ function ResultContent() {
     const prevBest = parseInt(localStorage.getItem(scoreKey) ?? "0", 10);
     if (correctCount > prevBest) {
       localStorage.setItem(scoreKey, String(correctCount));
+    }
+
+    // Sync best score to the league (logged-in users only; local progress above still works offline)
+    if (getToken()) {
+      const st = wrongCount === 0 ? 3 : wrongCount === 1 ? 2 : wrongCount === 2 ? 1 : 0;
+      api("/api/v1/me/scores", {
+        method: "POST",
+        body: { grade_group: grade, stage, correct: correctCount, stars: passed ? st : 0, points: passed ? correctCount * (stage <= 4 ? 5 : 2) : 0 },
+      }).catch(() => { /* league sync is best-effort */ });
     }
 
     // Unlock next stage if passed

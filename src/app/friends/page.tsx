@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
 interface Profile {
@@ -28,12 +28,7 @@ export default function FriendsPage() {
   const loadFollowing = async () => {
     if (!user) return;
     setLoading(true);
-    const { data } = await supabase
-      .from("follows")
-      .select("following_id, profiles!follows_following_id_fkey(id, display_name, username)")
-      .eq("follower_id", user.id);
-
-    const profiles = (data ?? []).map((r: { profiles: Profile }) => r.profiles).filter(Boolean);
+    const profiles = await api<Profile[]>("/api/v1/me/follows").catch(() => [] as Profile[]);
     setFollowing(profiles);
     setFollowingIds(new Set(profiles.map((p: Profile) => p.id)));
     setLoading(false);
@@ -42,24 +37,19 @@ export default function FriendsPage() {
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     setSearching(true);
-    const { data } = await supabase
-      .from("profiles")
-      .select("id, display_name, username")
-      .ilike("display_name", `%${searchQuery}%`)
-      .neq("id", user?.id ?? "")
-      .limit(10);
-    setSearchResults((data as Profile[]) ?? []);
+    const data = await api<Profile[]>(`/api/v1/profiles?q=${encodeURIComponent(searchQuery.trim())}`).catch(() => [] as Profile[]);
+    setSearchResults(data);
     setSearching(false);
   };
 
   const toggleFollow = async (targetId: string) => {
     if (!user) return;
     if (followingIds.has(targetId)) {
-      await supabase.from("follows").delete().eq("follower_id", user.id).eq("following_id", targetId);
+      await api(`/api/v1/me/follows/${targetId}`, { method: "DELETE" });
       setFollowingIds(prev => { const s = new Set(prev); s.delete(targetId); return s; });
       setFollowing(prev => prev.filter(p => p.id !== targetId));
     } else {
-      await supabase.from("follows").insert({ follower_id: user.id, following_id: targetId } as never);
+      await api(`/api/v1/me/follows/${targetId}`, { method: "PUT" });
       setFollowingIds(prev => new Set([...prev, targetId]));
     }
     loadFollowing();

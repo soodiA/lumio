@@ -21,9 +21,9 @@ export default function ProfilePage() {
     );
   }
 
-  const username = user.user_metadata?.username as string | undefined;
-  const phone = user.user_metadata?.phone as string | undefined;
-  const displayName = user.user_metadata?.display_name ?? username ?? "کاربر";
+  const username = user.username;
+  const phone = user.phone;
+  const displayName = user.display_name ?? username ?? "کاربر";
   const avatarLetter = displayName[0]?.toUpperCase() ?? "?";
 
   const handleSignOut = async () => {

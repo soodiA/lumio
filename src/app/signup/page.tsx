@@ -3,11 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
-import { usernameToEmail, validateUsername, validatePhone } from "@/lib/username-auth";
+import { api, type AuthUser } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import { validateUsername, validatePhone } from "@/lib/username-auth";
 
 export default function SignupPage() {
   const router = useRouter();
+  const { signIn } = useAuth();
   const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -27,28 +29,16 @@ export default function SignupPage() {
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
-        email: usernameToEmail(username),
-        password,
-        options: { data: { username: username.trim(), display_name: username.trim(), phone: phone.trim() } },
+      const res = await api<{ token: string; user: AuthUser }>("/api/v1/auth/register", {
+        method: "POST",
+        body: { username: username.trim(), display_name: username.trim(), phone: phone.trim(), password },
       });
-      if (error) {
-        if (/duplicate|unique|already/i.test(error.message)) {
-          setError("این نام کاربری قبلاً استفاده شده");
-        } else if (/rate limit|security purposes/i.test(error.message)) {
-          setError("سیستم موقتاً درخواست‌های ثبت‌نام رو محدود کرده (به‌خاطر تنظیم ایمیل تأیید در سوپابیس). چند دقیقه صبر کن یا این تنظیم رو خاموش کن");
-        } else if (/password/i.test(error.message)) {
-          setError("رمز عبور معتبر نیست: " + error.message);
-        } else if (/email/i.test(error.message) && /format|invalid/i.test(error.message)) {
-          setError("نام کاربری معتبر نیست، لطفاً حروف/اعداد دیگری امتحان کن");
-        } else {
-          setError(`خطا در ثبت‌نام: ${error.message}`);
-        }
-      } else {
-        router.push("/grade");
-      }
-    } catch {
-      setError("خطا در اتصال به سرور. اتصال اینترنت را بررسی کن و دوباره تلاش کن");
+      signIn(res.token, res.user);
+      router.push("/grade");
+    } catch (err) {
+      const code = (err as { code?: string }).code;
+      if (code === "DUPLICATE_USERNAME") setError("این نام کاربری قبلاً استفاده شده");
+      else setError("خطا در اتصال به سرور. اتصال اینترنت را بررسی کن و دوباره تلاش کن");
     }
     setLoading(false);
   };

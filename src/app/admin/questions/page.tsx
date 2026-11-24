@@ -1,12 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { api } from "@/lib/api";
 
 type Q = { id: number; stage: number; level: string; text_fa: string; grade_group: string | null; year: number | null };
 
@@ -20,11 +15,9 @@ export default function QuestionsPage() {
 
   async function load() {
     setLoading(true);
-    const { data } = await supabase
-      .from("questions")
-      .select("id,stage,level,text_fa,grade_group,year")
-      .order("stage").order("id");
-    setQuestions(data ?? []);
+    try {
+      setQuestions(await api<Q[]>("/api/v1/admin/questions", { admin: true }));
+    } catch { setQuestions([]); }
     setLoading(false);
   }
 
@@ -33,7 +26,7 @@ export default function QuestionsPage() {
   async function handleDelete(id: number) {
     if (!confirm("این سوال حذف شود؟")) return;
     setDeleting(id);
-    await supabase.from("questions").delete().eq("id", id);
+    try { await api(`/api/v1/admin/questions/${id}`, { method: "DELETE", admin: true }); } catch { alert("حذف نشد"); }
     await load();
     setDeleting(null);
   }
